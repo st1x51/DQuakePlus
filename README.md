@@ -25,6 +25,8 @@ Features:
 - fog
 - usermaps browser    
 - nodrawtoclient, drawonlytoclient    
+- .ent file support    
+
 
 ==========
 How to compile
