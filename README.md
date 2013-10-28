@@ -5,12 +5,12 @@ Fork of DQuake>>http://sourceforge.net/projects/pdquake/
 Original DQuake by Crow_Bar. 
 Used parts from:  
 QRack by R00K,   
-JoeQuake by Joseph, 
+JoeQuake by Joseph,    
 FitzQuake by John Fitzburg,  
-Kurok by mdave, 
-FuhQuake by fuh a norai, 
-FteQuake by Spike, 
-and DarkPlaces by Lord Havok! 
+Kurok by mdave,    
+FuhQuake by fuh a norai,   
+FteQuake by Spike,   
+and DarkPlaces by Lord Havok!   
 
 Features:
 - Q1BSP,HLBSP
