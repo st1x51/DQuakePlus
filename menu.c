@@ -61,6 +61,7 @@ m_main,
 m_singleplayer,
 m_load,
 m_save,
+m_maps, //Crow_bar. maplist
 m_multiplayer,
 m_setup,
 m_net,
@@ -83,6 +84,7 @@ void M_Menu_Main_f (void);
 	void M_Menu_SinglePlayer_f (void);
 		void M_Menu_Load_f (void);
 		void M_Menu_Save_f (void);
+		void M_Menu_Maps_f (void);
 	void M_Menu_MultiPlayer_f (void);
 		void M_Menu_Setup_f (void);
 		void M_Menu_Net_f (void);
@@ -103,6 +105,7 @@ void M_Main_Draw (void);
 	void M_SinglePlayer_Draw (void);
 		void M_Load_Draw (void);
 		void M_Save_Draw (void);
+		void M_Maps_Draw (void);
 	void M_MultiPlayer_Draw (void);
 		void M_Setup_Draw (void);
 		void M_Net_Draw (void);
@@ -122,6 +125,7 @@ void M_Main_Key (int key);
 void M_SinglePlayer_Key (int key);
 	void M_Load_Key (int key);
 	void M_Save_Key (int key);
+	void M_Maps_Key (int key);
 void M_MultiPlayer_Key (int key);
 	void M_Setup_Key (int key);
 	void M_Net_Key (int key);
@@ -438,7 +442,7 @@ void M_Main_Key (int key)
 /* SINGLE PLAYER MENU */
 
 int	m_singleplayer_cursor;
-#define	SINGLEPLAYER_ITEMS	3
+#define	SINGLEPLAYER_ITEMS  4
 
 
 void M_Menu_SinglePlayer_f (void)
@@ -460,7 +464,7 @@ void M_SinglePlayer_Draw (void)
 	M_DrawTransPic (72, 32, Draw_CachePic ("gfx/sp_menu.lmp") );
 
 	f = (int)(host_time * 10)%6;
-
+	M_Print (74, 100, "Maps");
 	M_DrawTransPic (54, 32 + m_singleplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
 }
 
@@ -509,6 +513,9 @@ void M_SinglePlayer_Key (int key)
 
 		case 2:
 			M_Menu_Save_f ();
+			break;	
+		case 3:
+			M_Menu_Maps_f ();
 			break;
 		}
 	}
@@ -680,7 +687,131 @@ void M_Save_Key (int k)
 		break;
 	}
 }
+//=============================================================================
+/* MAPS MENU by Crow_bar */
+#include <pspiofilemgr.h>
 
+#define MAPS_INPAGE  25
+#define MAPS_MAX     256
+#define MAPS_MAXNAME 32
+
+int		maps_cursor;
+int     maps_stage;
+int     maps_num;
+int     maps_maxlen;
+char    maps_list[MAPS_MAX][MAPS_MAXNAME];
+
+
+void M_ScanMaps ()
+{
+    maps_num = 0;
+	SceUID dir = sceIoDopen(va("%s/maps/usermaps", com_gamedir));
+	if(dir < 0)
+	{
+		return;
+	}
+
+	SceIoDirent dirent;
+    memset(&dirent, 0, sizeof(SceIoDirent));
+	while(sceIoDread(dir, &dirent) > 0)
+	{
+		if(dirent.d_name[0] == '.')
+		{
+			continue;
+		}
+		if(!strcasecmp(COM_FileExtension (dirent.d_name),"bsp"))
+	    {
+		  COM_StripExtension (dirent.d_name, maps_list[maps_num]);
+
+		  int cur_len = strlen(maps_list[maps_num]);
+		  if(maps_maxlen < cur_len)
+			 maps_maxlen = cur_len;
+
+          maps_num++;
+        }
+        memset(&dirent, 0, sizeof(SceIoDirent));
+    }
+	sceIoDclose(dir);
+
+}
+
+void M_Menu_Maps_f (void)
+{
+	m_entersound = true;
+	m_state = m_maps;
+	key_dest = key_menu;
+	M_ScanMaps ();
+}
+
+void M_Maps_Draw (void)
+{
+	int		i;
+
+    M_DrawTextBox (150, 8, 4, 1);
+    M_Print(158, 16, "Maps");
+
+    if((!maps_list[0]) && (maps_num == 0))
+    {
+       M_Print (32, 32 + 8,"Maps not found");
+       return;
+	}
+
+    M_DrawTextBox (24, 24, maps_maxlen, MAPS_INPAGE);
+
+	for (i = 0 ; i < MAPS_INPAGE; i++)
+	{
+		M_Print (32, 32 + 8*(i), maps_list[i+maps_stage]);
+    }
+
+// line cursor
+	M_DrawCharacter (24, 32 + maps_cursor * 8, 12+((int)(realtime*4)&1));
+}
+
+void M_Maps_Key (int k)
+{
+	switch (k)
+	{
+	case K_ESCAPE:
+		M_Menu_SinglePlayer_f ();
+		break;
+
+	case K_ENTER:
+		m_state = m_none;
+		key_dest = key_game;
+		Cbuf_AddText (va("map usermaps/%s\n", maps_list[maps_cursor+maps_stage]));
+		return;
+
+	case K_UPARROW:
+	case K_LEFTARROW:
+		S_LocalSound ("misc/menu1.wav");
+
+		maps_cursor--;
+	    if(maps_cursor < 0)//hh
+	    {
+			maps_cursor = 0;
+			if(maps_stage > 0)
+		       maps_stage--;
+        }
+
+		break;
+
+	case K_DOWNARROW:
+	case K_RIGHTARROW:
+		S_LocalSound ("misc/menu1.wav");
+
+	    if(maps_cursor >= maps_num-1)
+		   break;
+
+	    maps_cursor++;
+	    if(maps_cursor > MAPS_INPAGE-1)
+	    {
+		   maps_cursor = MAPS_INPAGE-1;
+		   if(maps_stage + maps_cursor < maps_num-1)
+		      maps_stage++;
+        }
+		break;
+	}
+}
 //=============================================================================
 /* MULTIPLAYER MENU */
 
@@ -4348,6 +4479,7 @@ void M_Init (void)
 	Cmd_AddCommand ("menu_singleplayer", M_Menu_SinglePlayer_f);
 	Cmd_AddCommand ("menu_load", M_Menu_Load_f);
 	Cmd_AddCommand ("menu_save", M_Menu_Save_f);
+	Cmd_AddCommand ("menu_maps", M_Menu_Maps_f); //Crow_bar. maplist
 	Cmd_AddCommand ("menu_multiplayer", M_Menu_MultiPlayer_f);
 	Cmd_AddCommand ("menu_setup", M_Menu_Setup_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
@@ -4408,7 +4540,11 @@ void M_Draw (void)
 	case m_save:
 		M_Save_Draw ();
 		break;
-
+		
+	case m_maps: //Crow_bar. maplist
+		M_Maps_Draw ();
+		break;
+		
 	case m_multiplayer:
 		M_MultiPlayer_Draw ();
 		break;
@@ -4508,7 +4644,11 @@ void M_Keydown (int key)
 	case m_save:
 		M_Save_Key (key);
 		return;
-
+		
+	case m_maps: //Crow_bar. maplist
+		M_Maps_Key (key);
+		return;
+		
 	case m_multiplayer:
 		M_MultiPlayer_Key (key);
 		return;

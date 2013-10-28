@@ -434,6 +434,8 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg, qboolean nomap)
 	float	miss;
 	edict_t	*ent;
 
+int clentnum; //Team XLink DP_SV_DRAWONLYTOCLIENT & DP_SV_NODRAWTOCLIENT
+
 	// Tomaz - QC Alpha Scale Glow Begin
     eval_t  *val;
     float	renderamt  = 0;
@@ -446,6 +448,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg, qboolean nomap)
 // find the client's PVS
 	VectorAdd (clent->v.origin, clent->v.view_ofs, org);
 	pvs = SV_FatPVS (org);
+clentnum = EDICT_TO_PROG(clent); // LordHavoc: for comparison purposes //Team XLink DP_SV_DRAWONLYTOCLIENT & DP_SV_NODRAWTOCLIENT
 
 // send over all entities (excpet the client) that touch the pvs
 	ent = NEXT_EDICT(sv.edicts);
@@ -463,6 +466,14 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg, qboolean nomap)
 // ignore ents without visible models
 			if (!ent->v.modelindex || !pr_strings[ent->v.model])
 				continue;
+
+//Team XLink DP_SV_DRAWONLYTOCLIENT & DP_SV_NODRAWTOCLIENT Start
+         if ((val = GETEDICTFIELDVALUE(ent, eval_drawonlytoclient)) && val->edict && val->edict != clentnum)
+            continue;
+            
+         if ((val = GETEDICTFIELDVALUE(ent, eval_nodrawtoclient)) && val->edict == clentnum)
+            continue;
+         //Team XLink DP_SV_DRAWONLYTOCLIENT & DP_SV_NODRAWTOCLIENT End
 
 			for (i=0 ; i < ent->num_leafs ; i++)
 			{

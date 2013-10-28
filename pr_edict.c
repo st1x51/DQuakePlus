@@ -65,6 +65,8 @@ int	eval_gravity, eval_items2, eval_ammo_shells1, eval_ammo_nails1;
 int	eval_ammo_lava_nails, eval_ammo_rockets1, eval_ammo_multi_rockets;
 int	eval_ammo_cells1, eval_ammo_plasma;
 int eval_idealpitch, eval_pitch_speed;
+int eval_nodrawtoclient; //Team Xlink DP_SV_NODRAWTOCLIENT
+int eval_drawonlytoclient; //Team Xlink DP_SV_DRAWONLYTOCLIENT
 
 // Half_life modes. Crow_bar
 int	eval_renderamt, eval_rendermode, eval_rendercolor;
@@ -92,6 +94,8 @@ void FindEdictFieldOffsets (void)
 	eval_ammo_multi_rockets = FindFieldOffset ("ammo_multi_rockets");
 	eval_ammo_cells1 = FindFieldOffset ("ammo_cells1");
 	eval_ammo_plasma = FindFieldOffset ("ammo_plasma");
+  	eval_nodrawtoclient      = FindFieldOffset("nodrawtoclient");
+ 	eval_drawonlytoclient   = FindFieldOffset("drawonlytoclient");
 
     eval_idealpitch = FindFieldOffset ("idealpitch");
 	eval_pitch_speed = FindFieldOffset ("pitch_speed");
@@ -238,6 +242,9 @@ ddef_t *ED_FindField (char *name)
 	}
 	return NULL;
 }
+
+int eval_nodrawtoclient; //Team Xlink DP_SV_NODRAWTOCLIENT
+int eval_drawonlytoclient; //Team Xlink DP_SV_DRAWONLYTOCLIENT
 
 
 /*

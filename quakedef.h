@@ -231,6 +231,8 @@ typedef struct
 	int		colormap;
 	int		skin;
 	int		effects;
+	unsigned short nodrawtoclient; //Team Xlink DP_SV_NODRAWTOCLIENT
+  	unsigned short drawonlytoclient; //Team Xlink DP_SV_DRAWONLYTOCLIENT
 } entity_state_t;
 
 #include "wad.h"

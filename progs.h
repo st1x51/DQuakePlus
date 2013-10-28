@@ -54,6 +54,11 @@ extern  int eval_idealpitch, eval_pitch_speed;
 // Half_life modes. Crow_bar
 extern	int	eval_renderamt, eval_rendermode, eval_rendercolor;
 
+//Team XLink DP_SV_DRAWONLYTOCLIENT & DP_SV_NODRAWTOCLIENT
+extern int eval_drawonlytoclient; //Team Xlink DP_SV_DRAWONLYTOCLIENT
+extern int eval_nodrawtoclient; //Team Xlink DP_SV_NODRAWTOCLIENT
+#define GETEDICTFIELDVALUE(ed, fieldoffset) (fieldoffset ? (eval_t*)((char*)&ed->v + fieldoffset) : NULL)
+
 //============================================================================
 
 extern	dprograms_t		*progs;
