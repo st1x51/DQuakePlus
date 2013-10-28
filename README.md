@@ -30,6 +30,8 @@ Features:
 - FRIK_FILE support   
 - Rotation brush support    
 - MOVETYPE_FOLLOW implemented (not tested)   
+- qcexec   
+- sv_freezenonclients    
 
 ==========
 How to compile
