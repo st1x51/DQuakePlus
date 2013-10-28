@@ -1,4 +1,4 @@
-=========
+==========
 DQuakePlus
 ==========
 Fork of DQuake>>http://sourceforge.net/projects/pdquake/
@@ -23,3 +23,14 @@ Features:
 - skybox from kurok
 - color lightmaps (from kurok / and for hlbsp);
 - fog
+
+==========
+How to compile
+==========
+1)download cygwin>http://quake-1.com/cache/cygwin.rar
+2)Extract folder on C://
+3)Go in to cygwin folder and launch .bat file
+4)Type "cd" and path to psp folder with make files,like a "cd dquakeplus/psp"
+5)To compile SLIM EBOOT type "cd makeslim install"
+  To compile PHAT EBOOT type "cd makephat install"
+6)Profit
