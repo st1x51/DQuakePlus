@@ -25,6 +25,7 @@ Features:
 - fog
 - usermaps browser    
 - nodrawtoclient, drawonlytoclient    
+
 ==========
 How to compile
 ==========
