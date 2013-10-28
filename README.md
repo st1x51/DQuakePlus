@@ -14,11 +14,11 @@ and DarkPlaces by Lord Havok!
 
 Features:
 - Q1BSP,HLBSP
-- MDL, MD2, MD3
+- MDL(Quake and Hexen 2), MD2, MD3
 - Halflife / CS1.6 Modelformat(without bone controll)
 - QMB and Quake 3 Particles
 - External Textures (bmp,tga,png,pcx)
-- spr,spr32 for sprites
+- spr(Quake),spr32(DarkPlaces),sp2(Quake2),spr(HL,not working) for sprites.
 - decals
 - skybox from kurok
 - color lightmaps (from kurok / and for hlbsp);
