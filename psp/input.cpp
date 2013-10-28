@@ -18,16 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include <pspkernel.h>
-#include <pspsdk.h>
 #include <pspctrl.h>
-#include <psphprm.h>
 
 extern "C"
 {
-#if 0
-#include "KernelHooks/ctrl/cwbhook.h"
-#endif
 #include "../quakedef.h"
 }
 
@@ -46,16 +40,6 @@ namespace quake
 		// The previous key state (for checking if things changed).
 		static SceCtrlData		lastPad;
 		static bool				readyToBindKeys	= false;
-
-		//new type HPRM without conflicts key. Crow_bar
-		typedef int	ButtonToKeyMapHPRM[buttonCount];
-		static ButtonToKeyMapHPRM		buttonToGameKeyMapHPRM;
-        static ButtonToKeyMapHPRM		buttonToConsoleKeyMapHPRM;
-		static ButtonToKeyMapHPRM		buttonToMessageKeyMapHPRM;
-		static ButtonToKeyMapHPRM		buttonToMenuKeyMapHPRM;
-
-		//HPRM previous key state. Crow_bar
-        static unsigned int lasthprm;
 
 		static unsigned int buttonMaskToShift(unsigned int mask)
 		{
@@ -131,38 +115,15 @@ void IN_Init (void)
 	memcpy(buttonToConsoleKeyMap, buttonToGameKeyMap, sizeof(ButtonToKeyMap));
 	memcpy(buttonToMessageKeyMap, buttonToGameKeyMap, sizeof(ButtonToKeyMap));
 	memcpy(buttonToMenuKeyMap, buttonToGameKeyMap, sizeof(ButtonToKeyMap));
-    memcpy(buttonToGameKeyMapHPRM, buttonToGameKeyMap, sizeof(ButtonToKeyMapHPRM));
 
 	// Game keys:
-   	buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_LTRIGGER)]	= K_AUX1;
+	buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_LTRIGGER)]	= K_AUX1;
 	buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_RTRIGGER)]	= K_AUX2;
-#if 0
-    if(ctrl_kernel)
-    {
-       buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_NOTE)]	    = K_AUX3;
-       buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_HOME)]	    = K_AUX4;
-	   buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_VOLUP)]	= K_AUX11;
-       buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_VOLDOWN)]	= K_AUX12;
-       buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_SCREEN)]	= K_AUX13;
-    }
-#endif
 	buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_TRIANGLE)]	= K_JOY1;
-	buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_CIRCLE)]		= K_JOY2;	
+	buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_CIRCLE)]		= K_JOY2;
 	buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_CROSS)]		= K_JOY3;
 	buttonToGameKeyMap[buttonMaskToShift(PSP_CTRL_SQUARE)]		= K_JOY4;
 
-	//HPRM Control. Crow_bar
-	buttonToGameKeyMapHPRM[buttonMaskToShift(PSP_HPRM_PLAYPAUSE)]	= K_AUX5;
-    buttonToGameKeyMapHPRM[buttonMaskToShift(PSP_HPRM_FORWARD)]	    = K_AUX6;
-    buttonToGameKeyMapHPRM[buttonMaskToShift(PSP_HPRM_BACK)]	    = K_AUX7;
-#if 0
-    if(ctrl_kernel)
-    {
-	    buttonToGameKeyMapHPRM[buttonMaskToShift(PSP_HPRM_VOL_UP)]	    = K_AUX8;
-	    buttonToGameKeyMapHPRM[buttonMaskToShift(PSP_HPRM_VOL_DOWN)]	= K_AUX9;
-		buttonToGameKeyMapHPRM[buttonMaskToShift(PSP_HPRM_HOLD)]	    = K_AUX10;
-	}
-#endif
 	// Console keys:
 	buttonToConsoleKeyMap[buttonMaskToShift(PSP_CTRL_LTRIGGER)]	= K_PGUP;
 	buttonToConsoleKeyMap[buttonMaskToShift(PSP_CTRL_RTRIGGER)]	= K_PGDN;
@@ -178,12 +139,9 @@ void IN_Init (void)
 	buttonToMenuKeyMap[buttonMaskToShift(PSP_CTRL_SQUARE)]	= K_INS;
 	buttonToMenuKeyMap[buttonMaskToShift(cancelButton)]		= K_ESCAPE;
 	buttonToMenuKeyMap[buttonMaskToShift(okButton)]			= K_ENTER;
-
-	buttonToMenuKeyMap[buttonMaskToShift(PSP_CTRL_SELECT)]	= 'E';
-	buttonToMenuKeyMap[buttonMaskToShift(PSP_CTRL_TRIANGLE)] = K_DEL;
-
-	buttonToMenuKeyMap[buttonMaskToShift(PSP_CTRL_RTRIGGER)] = K_AUX10;
-	buttonToMenuKeyMap[buttonMaskToShift(PSP_CTRL_LTRIGGER)] = K_AUX11;
+	buttonToMenuKeyMap[buttonMaskToShift(PSP_CTRL_TRIANGLE)]	= K_DEL;
+	buttonToMenuKeyMap[buttonMaskToShift(PSP_CTRL_LTRIGGER)]	= K_AUX1;
+	buttonToMenuKeyMap[buttonMaskToShift(PSP_CTRL_RTRIGGER)]	= K_AUX2;
 }
 
 void IN_Shutdown (void)
@@ -193,15 +151,6 @@ void IN_Shutdown (void)
 
 void IN_Commands (void)
 {
-	//HPRM Control. Crow_bar
-	unsigned int hprmkey;
-
-	if(sceHprmIsRemoteExist())
-	   sceHprmPeekCurrentKey(&hprmkey);
-	//else
-	//   hprmkey = 0;
-
-
 	// Changed in or out of key binding mode?
 	if ((bind_grab != 0) != readyToBindKeys)
 	{
@@ -217,17 +166,6 @@ void IN_Commands (void)
 				{
 					// Is the button in the map?
 					const int key = buttonToGameKeyMap[button];
-					if (key)
-					{
-						// Send a release event.
-						Key_Event(key, qfalse);
-					}
-				}
-                //HPRM Control. Crow_bar
-				else if (lasthprm & (1 << button))
-				{
-					// Is the button in the map?
-					const int key = buttonToGameKeyMapHPRM[button];
 					if (key)
 					{
 						// Send a release event.
@@ -256,17 +194,6 @@ void IN_Commands (void)
 						Key_Event(key, qfalse);
 					}
 				}
-                //HPRM Control. Crow_bar
-				else if (lasthprm & (1 << button))
-				{
-					// Is the button in the map?
-					const int key = buttonToMenuKeyMapHPRM[button];
-					if (key)
-					{
-						// Send a release event.
-						Key_Event(key, qfalse);
-					}
-				}
 			}
 
 			// We're now ready to bind keys.
@@ -276,23 +203,18 @@ void IN_Commands (void)
 
 	// Use a different key mapping depending on where inputs are going to go.
 	const ButtonToKeyMap* buttonToKeyMap = 0;
-   	const ButtonToKeyMapHPRM* buttonToKeyMapHPRM = 0; //HPRM Control. Crow_bar
-
 	switch (key_dest)
 	{
 	case key_game:
 		buttonToKeyMap = &buttonToGameKeyMap;
-        buttonToKeyMapHPRM = &buttonToGameKeyMapHPRM; //HPRM Control. Crow_bar
 		break;
 
 	case key_console:
 		buttonToKeyMap = &buttonToConsoleKeyMap;
-        buttonToKeyMapHPRM = &buttonToConsoleKeyMapHPRM; //HPRM Control. Crow_bar
 		break;
 
 	case key_message:
 		buttonToKeyMap = &buttonToMessageKeyMap;
-        buttonToKeyMapHPRM = &buttonToMessageKeyMapHPRM; //HPRM Control. Crow_bar
 		break;
 
 	case key_menu:
@@ -300,12 +222,10 @@ void IN_Commands (void)
 		if (readyToBindKeys)
 		{
 			buttonToKeyMap = &buttonToGameKeyMap;
-            buttonToKeyMapHPRM = &buttonToGameKeyMapHPRM; //HPRM Control. Crow_bar
 		}
 		else
 		{
 			buttonToKeyMap = &buttonToMenuKeyMap;
-            buttonToKeyMapHPRM = &buttonToMenuKeyMapHPRM; //HPRM Control. Crow_bar
 		}
 		break;
 
@@ -315,13 +235,8 @@ void IN_Commands (void)
 	}
 
 	// Read the pad state.
-    SceCtrlData pad;
-#if 0
-    if(ctrl_kernel)
-       cwbCtrlPeekBufferPositive(&pad, 1);
-    else
-#endif
-	   sceCtrlPeekBufferPositive(&pad, 1);
+	SceCtrlData pad;
+	sceCtrlPeekBufferPositive(&pad, 1);
 
 	// Find out which buttons have changed.
 	SceCtrlData deltaPad;
@@ -329,9 +244,6 @@ void IN_Commands (void)
 	deltaPad.Lx			= pad.Lx - lastPad.Lx;
 	deltaPad.Ly			= pad.Ly - lastPad.Ly;
 	deltaPad.TimeStamp	= pad.TimeStamp	- lastPad.TimeStamp;
-
-	//HPRM delta. Crow_bar
-	unsigned int deltaHPRM	= hprmkey ^ lasthprm;
 
 	// Handle buttons which have changed.
 	for (unsigned int button = 0; button < buttonCount; ++button)
@@ -350,21 +262,9 @@ void IN_Commands (void)
 				Key_Event(key, state);
 			}
 		}
-        else if (deltaHPRM & buttonMask)
-		{
-			// Is the button in the map?
-			const int key = (*buttonToKeyMapHPRM)[button];
-			if (key)
-			{
-				// Send an event.
-				const qboolean	state	= (hprmkey & buttonMask) ? qtrue : qfalse;
-				Key_Event(key, state);
-			}
-		}
 	}
 
 	// Remember the pad state for next time.
-    lasthprm = hprmkey; //HPRM Control. Crow_bar
 	lastPad = pad;
 }
 
@@ -408,11 +308,7 @@ void IN_Move (usercmd_t *cmd)
 	}
 	// Read the pad state.
 	SceCtrlData pad;
-
-    //if(ctrl_kernel)
-    //   cwbCtrlPeekBufferPositive(&pad, 1);
-    //else
-	   sceCtrlPeekBufferPositive(&pad, 1);
+	sceCtrlPeekBufferPositive(&pad, 1);
 
 	// Convert the inputs to floats in the range [-1, 1].
 	// Implement the dead zone.
