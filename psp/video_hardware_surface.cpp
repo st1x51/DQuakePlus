@@ -976,16 +976,27 @@ void R_RenderBrushPoly (msurface_t *fa)
         return;
     }
 
+    if (!Q_strncmp(fa->texinfo->texture->name,"{",1))
+    {
+		sceGuEnable(GU_ALPHA_TEST);
+		sceGuAlphaFunc(GU_GREATER, 0x88, 0xff);
+	}
+
     if (fa->flags & SURF_UNDERWATER)
 		DrawGLWaterPoly (fa->polys);
 	else
 		DrawGLPoly (fa->polys);
-#if 0
+
+	if (!Q_strncmp(fa->texinfo->texture->name,"{",1))
+	{
+        sceGuAlphaFunc(GU_GREATER, 0, 0xff);
+     	sceGuDisable(GU_ALPHA_TEST);
+	}
+	
     if (!Q_strncmp(fa->texinfo->texture->name,"glass",5))
 	{
         EmitRefPolys (fa);
 	}
-#endif
 	// add the poly to the proper lightmap chain
 	fa->polys->chain = lightmap_polys[fa->lightmaptexturenum];
 	lightmap_polys[fa->lightmaptexturenum] = fa->polys;

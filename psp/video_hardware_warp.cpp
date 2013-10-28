@@ -580,37 +580,32 @@ EmitRefPolys
 */
 void EmitRefPolys (msurface_t *fa)
 {
-
-	sceGuEnable(GU_BLEND);
-	sceGuBlendFunc (GU_ADD, GU_DST_COLOR, GU_SRC_COLOR, 0, 0);
-
-	GL_Bind(ref_texture);
-
+	// For each polygon...
 	for (const glpoly_t* p = fa->polys; p; p = p->next)
 	{
 		// Allocate memory for this polygon.
 		const int		unclipped_vertex_count	= p->numverts;
-		glvert_t* const	unclipped_vertices		= static_cast<glvert_t*>(sceGuGetMemory(sizeof(glvert_t) * unclipped_vertex_count));
+		glvert_t* const	unclipped_vertices		=
+			static_cast<glvert_t*>(sceGuGetMemory(sizeof(glvert_t) * unclipped_vertex_count));
 
-		vec3_t	dir;
 		// Generate each vertex.
 		const glvert_t*	src			= p->verts;
 		const glvert_t*	last_vertex = src + unclipped_vertex_count;
 		glvert_t*		dst			= unclipped_vertices;
-		vec3_t		viewer, reflected;
+
 		while (src != last_vertex)
 		{
-		    VectorSubtract(src[0].xyz, r_origin, dir);
-			
+			vec3_t	dir;
+			VectorSubtract(src->xyz, r_origin, dir);
 			dir[2] *= 3;	// flatten the sphere
 
 			const float length = 6 * 63 / sqrtf(DotProduct(dir, dir));
 
-            dir[0] *= length;
+			dir[0] *= length;
 			dir[1] *= length;
 
-			dst->st[0] = dir[0] * (1.0f / 512.0f);
-			dst->st[1] = dir[1] * (1.0f / 512.0f);
+			dst->st[0] = (dir[0]) * (1.0f / 256.0f);
+			dst->st[1] = (dir[1]) * (1.0f / 256.0f);
 			dst->xyz[0] = src->xyz[0];
 			dst->xyz[1] = src->xyz[1];
 			dst->xyz[2] = src->xyz[2];
@@ -656,8 +651,6 @@ void EmitRefPolys (msurface_t *fa)
 				unclipped_vertex_count, 0, unclipped_vertices);
 		}
 	}
-    sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);//return to normal blend
-    sceGuDisable (GU_BLEND); 
 }
 
 /*

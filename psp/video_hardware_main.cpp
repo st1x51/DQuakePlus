@@ -63,6 +63,9 @@ qboolean	mirror;
 mplane_t	*mirror_plane;
 
 void R_RenderDecals (void);
+bool    fixlight;
+bool    alphafunc2;
+bool    alphafunc;
 //
 // view origin
 //
@@ -1223,12 +1226,15 @@ void GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, ent
                 point1[1] = verts1->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
                 point1[2] = verts1->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
 
-
+                point1[0] -= shadevector[0]*(point1[2]+lheight);
+                point1[1] -= shadevector[1]*(point1[2]+lheight);
 
                 point2[0] = verts2->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
                 point2[1] = verts2->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
                 point2[2] = verts2->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
 
+                point2[0] -= shadevector[0]*(point2[2]+lheight);
+                point2[1] -= shadevector[1]*(point2[2]+lheight);
 
                 VectorSubtract(point2, point1, d);
 
@@ -1459,9 +1465,8 @@ void GL_DrawQ2AliasFrame (entity_t *e, md2_t *pheader, int lastpose, int pose, f
 			// texture coordinates come from the draw list
 			out[vertex_index].u = ((float *)order)[0];
 			out[vertex_index].v = ((float *)order)[1];
-			
-            l = shadedots[verts2->lightnormalindex] - shadedots[verts1->lightnormalindex];
-
+            l = shadedots[verts1->lightnormalindex];
+ 
 			float       r,g,b;
 
 			r = l * lightcolor[0];
@@ -1870,7 +1875,11 @@ void R_DrawAliasModel (entity_t *e)
 		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
 		force_fullbright = true;
 	}
-
+	//DQ+ note: this is for tranparency on weapons,alphafunc for pink,alphafunc2 for blue
+//	if (!strcmp (clmodel->name, "progs/model.mdl"))
+//	{
+//		alphafunc = true;
+//	}
 	shadedots = r_avertexnormal_dots[((int)(e->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 
 	// LordHavoc: .lit support begin
@@ -1943,11 +1952,24 @@ void R_DrawAliasModel (entity_t *e)
 		    GL_Bind(playertextures - 1 + i);
 		}
 	}
-
+//for models(pink transparency)
+	if (alphafunc)
+	{
+		sceGuEnable(GU_ALPHA_TEST);
+		sceGuAlphaFunc(GU_GREATER, 0, 0xff);
+		sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+	}
 	if (force_fullbright)
 		sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
     else
 		sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+	//for models (blue transparency)
+	 if (alphafunc2)
+    {
+        sceGuEnable(GU_ALPHA_TEST);
+        sceGuAlphaFunc(GU_GREATER, 0xaa, 0xff);
+        sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+    }
 
 	sceGuShadeModel(GU_SMOOTH);
 
@@ -1995,7 +2017,10 @@ void R_DrawAliasModel (entity_t *e)
 				 R_SetupAliasFrame (currententity->frame, paliashdr, e->angles[0], e->angles[1]);
 	        }
 	}
-
+	sceGuAlphaFunc(GU_GREATER, 0, 0xff);
+	sceGuDisable(GU_ALPHA_TEST);
+	sceGuTexFunc(GU_TFX_REPLACE , GU_TCC_RGBA);
+	sceGuShadeModel(GU_FLAT);
 	if (clmodel->aliastype != ALIASTYPE_MD2)
 	{
 		sceGuShadeModel(GU_FLAT);
