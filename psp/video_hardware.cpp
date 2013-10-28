@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <psputility.h>
 #include <pspdebug.h>
 #include <malloc.h>
-
+#include <limits.h>
 extern "C"
 {
 #include "../quakedef.h"

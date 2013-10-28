@@ -3,7 +3,7 @@ PSPSDK = $(shell psp-config --pspsdk-path)
 PSPLIBSDIR = $(PSPSDK)/..
 
 TARGET = DQuake
-PSP_EBOOT_TITLE = PSP DarkQuake PHAT ver: 0.88
+PSP_EBOOT_TITLE = PSP DarkQuake PHAT ver: Plus
 
 #PSP_EBOOT_ICON = icon.png
 PSP_EBOOT_PIC1 = PIC0.PNG
@@ -72,7 +72,6 @@ HARDWARE_VIDEO_ONLY_OBJS = \
 	clipping.o \
     video_hardware.o \
     video_hardware_resample.o \
-    video_hardware_bloom.o \
     video_hardware_images.o \
     video_hardware_fullbright.o \
     video_hardware_hlmdl.o \
