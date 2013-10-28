@@ -304,7 +304,7 @@ void Host_Map_f (void)
 
 	svs.serverflags = 0;			// haven't completed an episode yet
 	strcpy (name, Cmd_Argv(1));
-#ifdef QUAKE2
+#if 666
 	SV_SpawnServer (name, NULL);
 #else
 	SV_SpawnServer (name);
@@ -335,7 +335,7 @@ Goes to a new map, taking all clients along
 */
 void Host_Changelevel_f (void)
 {
-#ifdef QUAKE2
+#if 666
 	char	level[MAX_QPATH];
 	char	_startspot[MAX_QPATH];
 	char	*startspot;
@@ -391,7 +391,7 @@ Restarts the current server for a dead player
 void Host_Restart_f (void)
 {
 	char	mapname[MAX_QPATH];
-#ifdef QUAKE2
+#if 666
 	char	startspot[MAX_QPATH];
 #endif
 
@@ -402,9 +402,13 @@ void Host_Restart_f (void)
 		return;
 	strcpy (mapname, sv.name);	// must copy out, because it gets cleared
 								// in sv_spawnserver
-#ifdef QUAKE2
+#if 666
 	strcpy(startspot, sv.startspot);
+	// try to restore the new level
+	if (LoadGamestate (mapname, startspot))
 	SV_SpawnServer (mapname, startspot);
+	else
+	SV_SpawnServer (mapname, NULL);
 #else
 	SV_SpawnServer (mapname);
 #endif
@@ -648,7 +652,7 @@ void Host_Loadgame_f (void)
 
 	CL_Disconnect_f ();
 	
-#ifdef QUAKE2
+#if 666
 	SV_SpawnServer (mapname, NULL);
 #else
 	SV_SpawnServer (mapname);
@@ -731,7 +735,7 @@ void Host_Loadgame_f (void)
 	}
 }
 
-#ifdef QUAKE2
+#if 666
 void SaveGamestate()
 {
 	char	name[256];
@@ -1906,7 +1910,7 @@ void Host_InitCommands (void)
 	Cmd_AddCommand ("map", Host_Map_f);
 	Cmd_AddCommand ("restart", Host_Restart_f);
 	Cmd_AddCommand ("changelevel", Host_Changelevel_f);
-#ifdef QUAKE2
+#if 666
 	Cmd_AddCommand ("changelevel2", Host_Changelevel2_f);
 #endif
 	Cmd_AddCommand ("connect", Host_Connect_f);

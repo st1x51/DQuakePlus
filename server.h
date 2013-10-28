@@ -45,7 +45,7 @@ typedef struct
 	double		lastchecktime;
 	
 	char		name[64];			// map name
-#ifdef QUAKE2
+#if 666
 	char		startspot[64];
 #endif
 	char		modelname[64];		// maps/<name>.bsp, for model_precache[0]
@@ -160,7 +160,7 @@ typedef struct client_s
 #define	FL_PARTIALGROUND		1024	// not all corners are valid
 #define	FL_WATERJUMP			2048	// player jumping out of water
 #define	FL_JUMPRELEASED			4096	// for jump debouncing
-#ifdef QUAKE2
+#if 666
 #define FL_FLASHLIGHT			8192
 #define FL_ARCHIVE_OVERRIDE		1048576
 #endif
@@ -186,7 +186,7 @@ typedef struct client_s
 #define	TX_SCROLL            16384
 #define	TX_REF               32768
 
-#ifdef QUAKE2
+#if 666
 // server flags
 #define	SFL_EPISODE_1		1
 #define	SFL_EPISODE_2		2
@@ -254,7 +254,7 @@ void SV_MoveToGoal (void);
 void SV_CheckForNewClients (void);
 void SV_RunClients (void);
 void SV_SaveSpawnparms ();
-#ifdef QUAKE2
+#if 666
 void SV_SpawnServer (char *server, char *startspot);
 #else
 void SV_SpawnServer (char *server);

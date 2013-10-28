@@ -1694,7 +1694,7 @@ PF_changelevel
 */
 void PF_changelevel (void)
 {
-#ifdef QUAKE2
+#if 666
 	char	*s1, *s2;
 
 	if (svs.changelevel_issued)

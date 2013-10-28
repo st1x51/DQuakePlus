@@ -50,7 +50,7 @@ extern int changeMp3Volume;
 #endif
 
 extern qboolean bmg_type_changed;
-
+void CL_RemoveGIPFiles (char *path);
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
 
@@ -503,6 +503,7 @@ void M_SinglePlayer_Key (int key)
 			key_dest = key_game;
 			if (sv.active)
 				Cbuf_AddText ("disconnect\n");
+			CL_RemoveGIPFiles(NULL);
 			Cbuf_AddText ("maxplayers 1\n");
 			Cbuf_AddText ("map start\n");
 			break;

@@ -112,6 +112,32 @@ void CL_ClearState (void)
 	cl.free_efrags[i].entnext = NULL;
 }
 
+void CL_RemoveGIPFiles (char *path)
+{
+	char	*name, tempdir[MAX_OSPATH];
+
+	if (path)
+		snprintf(tempdir, MAX_OSPATH, "%s", path);
+	else
+		snprintf(tempdir, MAX_OSPATH, "%s", com_savedir);
+
+	name = Sys_FindFirstFile (tempdir, "*.gip");
+
+	if (tempdir[strlen(tempdir)-1] == '/')
+		tempdir[strlen(tempdir)-1] = '\0';
+		
+	while (name)
+	{
+		Con_DPrintf ("Removing %s %s\n",tempdir,name);
+		
+		unlink (va("%s/%s", tempdir, name));
+
+		name = Sys_FindNextFile();
+	}
+
+	Sys_FindClose();
+}
+
 /*
 =====================
 CL_Disconnect
@@ -146,6 +172,7 @@ void CL_Disconnect (void)
 		cls.state = ca_disconnected;
 		if (sv.active)
 			Host_ShutdownServer(false);
+		CL_RemoveGIPFiles(NULL);
 	}
 
 	cls.demoplayback = cls.timedemo = false;

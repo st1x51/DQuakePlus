@@ -109,6 +109,7 @@ void FindEdictFieldOffsets (void)
 	eval_rendermode  = FindFieldOffset ("rendermode");
     eval_rendercolor = FindFieldOffset ("rendercolor");
 #endif
+	EndFrameQC 				= ED_FindFunction ("EndFrame");
 }
 
 /*

@@ -36,6 +36,9 @@ int Sys_FileWrite (int handle, void *data, int count);
 int	Sys_FileTime (char *path);
 void Sys_mkdir (char *path);
 
+char *Sys_FindNextFile (void);
+void Sys_FindClose (void);
+char *Sys_FindFirstFile (char *path, char *pattern);
 //
 // memory protection
 //

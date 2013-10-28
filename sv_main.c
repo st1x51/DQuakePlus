@@ -1130,7 +1130,7 @@ This is called at the start of each level
 */
 extern float		scr_centertime_off;
 
-#ifdef QUAKE2
+#if 666
 void SV_SpawnServer (char *server, char *startspot)
 #else
 void SV_SpawnServer (char *server)
@@ -1176,7 +1176,7 @@ void SV_SpawnServer (char *server)
 	memset (&sv, 0, sizeof(sv));
 
 	strcpy (sv.name, server);
-#ifdef QUAKE2
+#if 666
 	if (startspot)
 		strcpy(sv.startspot, startspot);
 #endif
@@ -1257,7 +1257,7 @@ void SV_SpawnServer (char *server)
 		pr_global_struct->deathmatch = deathmatch.value;
 
 	pr_global_struct->mapname = sv.name - pr_strings;
-#ifdef QUAKE2
+#if 666
 	pr_global_struct->startspot = sv.startspot - pr_strings;
 #endif
 

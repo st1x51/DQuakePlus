@@ -53,7 +53,7 @@ char	**com_argv;
 
 #define CMDLINE_LENGTH	256
 char	com_cmdline[CMDLINE_LENGTH];
-
+char    com_savedir[MAX_OSPATH];
 qboolean		standard_quake = true, rogue, hipnotic;
 qboolean       user_maps = false;
 // this graphic needs to be in the pak file to use registered features
@@ -2128,7 +2128,13 @@ void COM_InitFilesystem (void)
 
 	if (COM_CheckParm ("-proghack"))
 		proghack = true;
+	i = COM_CheckParm ("-savedir");
+	if (i)
+	{
+		sprintf(com_savedir,"%s/"GAMENAME, basedir);
+	}
+	else
+	{
+		strcpy(com_savedir,com_gamedir);
+	}
 }
-
-
-
