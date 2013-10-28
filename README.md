@@ -38,8 +38,7 @@ How to compile
 5)To compile SLIM EBOOT type "make -f  makeslim install"
 
   To compile PHAT EBOOT type "make -f makephat install"
-  
-6)Profit
+
 ==========
 Transparency
 ==========
