@@ -27,6 +27,9 @@ Features:
 - nodrawtoclient, drawonlytoclient    
 - .ent file support    
 - ricochets   
+- FRIK_FILE support   
+- Rotation brush support    
+- MOVETYPE_FOLLOW implemented (not tested)   
 
 ==========
 How to compile
@@ -69,3 +72,18 @@ weapons/rics/wood_ric3.wav
 weapons/rics/metal_ric1.wav   
 weapons/rics/metal_ric2.wav   
 weapons/rics/metal_ric3.wav   
+
+==========
+MOVETYPE_FOLLOW
+==========
+aiment - the entity this is attached to.   
+punchangle - the original angles when the follow began.   
+view_ofs - the relative origin (note that this is un-rotated by punchangle, and that is actually the only purpose of punchangle).    
+v_angle - the relative angles.   
+Here's an example of how you would set a bullet hole sprite to follow a bmodel it was created on, even if the bmodel rotates:    
+hole.movetype = MOVETYPE_FOLLOW; // make the hole follow    
+hole.solid = SOLID_NOT;          // MOVETYPE_FOLLOW is always non-solid   
+hole.aiment = bmodel;            // make the hole follow bmodel    
+hole.punchangle = bmodel.angles; // the original angles of bmodel   
+hole.view_ofs = hole.origin - bmodel.origin; // relative origin   
+hole.v_angle = hole.angles - bmodel.angles;  // relative angles   
