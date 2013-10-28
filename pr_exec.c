@@ -352,6 +352,8 @@ int PR_LeaveFunction (void)
 	return pr_stack[pr_depth].s;
 }
 
+#define RUNAWAY_STEP (RUNAWAY / 5)
+#define RUNAWAY	     5000000
 
 /*
 ====================
@@ -369,6 +371,10 @@ void PR_ExecuteProgram (func_t fnum)
 	edict_t	*ed;
 	int		exitdepth;
 	eval_t	*ptr;
+// 2001-09-14 Enhanced BuiltIn Function System (EBFS) by Maddes  start
+	char	*funcname;
+	char	*remaphint;
+// 2001-09-14 Enhanced BuiltIn Function System (EBFS) by Maddes  end
 
 	if (!fnum || fnum >= progs->numfunctions)
 	{
@@ -379,7 +385,7 @@ void PR_ExecuteProgram (func_t fnum)
 	
 	f = &pr_functions[fnum];
 
-	runaway = 100000;
+	runaway = RUNAWAY; //was 100000;
 	pr_trace = false;
 
 // make a stack frame
@@ -390,6 +396,8 @@ void PR_ExecuteProgram (func_t fnum)
 while (1)
 {
 	s++;	// next statement
+	pr_xstatement = s;
+	pr_xfunction->profile++;
 
 	st = &pr_statements[s];
 	a = (eval_t *)&pr_globals[st->a];
@@ -398,10 +406,13 @@ while (1)
 	
 	if (!--runaway)
 		PR_RunError ("runaway loop error");
-		
-	pr_xfunction->profile++;
-	pr_xstatement = s;
 	
+	if (runaway < RUNAWAY - RUNAWAY_STEP + 1 && runaway % RUNAWAY_STEP == 0)
+	{
+		Con_Printf ("PR_ExecuteProgram: runaway loop %d\n", runaway / RUNAWAY_STEP);
+		SCR_UpdateScreen (); // Force screen update
+		S_ClearBuffer ();    // Avoid looping sounds
+	}
 	if (pr_trace)
 		PR_PrintStatement (st);
 		
@@ -626,8 +637,21 @@ while (1)
 		if (newf->first_statement < 0)
 		{	// negative statements are built in functions
 			i = -newf->first_statement;
-			if (i >= pr_numbuiltins)
-				PR_RunError ("Bad builtin call number");
+// 2001-09-14 Enhanced BuiltIn Function System (EBFS) by Maddes  start
+			if ( (i >= pr_numbuiltins)||(pr_builtins[i] == pr_ebfs_builtins[0].function) )
+			{
+				funcname = pr_strings + newf->s_name;
+				if (pr_builtin_remap.value)
+				{
+					remaphint = NULL;
+				}
+				else
+				{
+					remaphint = "Try \"builtin remapping\" by setting PR_BUILTIN_REMAP to 1\n";
+				}
+			PR_RunError ("Bad builtin call number %i for %s\n", i, funcname, remaphint);
+			}
+// 2001-09-14 Enhanced BuiltIn Function System (EBFS) by Maddes  end
 			pr_builtins[i] ();
 			break;
 		}

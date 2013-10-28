@@ -102,7 +102,32 @@ void Host_Status_f (void)
 	}
 }
 
+/*
+==================
+Host_QC_Exec
 
+Execute QC commands from the console
+==================
+*/
+void Host_QC_Exec (void)
+{
+	dfunction_t *f;
+	if (cmd_source == src_command)
+	{
+		Cmd_ForwardToServer ();
+		return;
+	}
+	if (!developer.value)
+		return;
+	f = 0;
+	if ((f = ED_FindFunction(Cmd_Argv(1))) != NULL)
+	{
+		pr_global_struct->self = EDICT_TO_PROG(sv_player);
+		PR_ExecuteProgram ((func_t)(f - pr_functions));
+	}
+	else
+		Con_Printf("bad function\n");
+}
 /*
 ==================
 Host_God_f
@@ -1917,6 +1942,5 @@ void Host_InitCommands (void)
 	Cmd_AddCommand ("viewprev", Host_Viewprev_f);
 
 	Cmd_AddCommand ("mcache", Mod_Print);
-
-
+    Cmd_AddCommand ("qcexec", Host_QC_Exec);
 }

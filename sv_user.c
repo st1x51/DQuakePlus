@@ -569,6 +569,8 @@ nextmsg:
 					ret = 1;
 				else if (Q_strncasecmp(s, "ban", 3) == 0)
 					ret = 1;
+				else if (Q_strncasecmp(s, "qcexec", 6) == 0)
+					ret = 1;	
 				if (ret == 2)
 					Cbuf_InsertText (s);
 				else if (ret == 1)

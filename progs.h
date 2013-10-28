@@ -127,6 +127,23 @@ extern	int		type_size[8];
 typedef void (*builtin_t) (void);
 extern	builtin_t *pr_builtins;
 extern int pr_numbuiltins;
+// 2001-09-14 Enhanced BuiltIn Function System (EBFS) by Maddes  start
+
+typedef struct ebfs_builtin_s
+
+{
+	int			default_funcno;
+	char		*funcname;
+	builtin_t	function;
+	int			funcno;
+} ebfs_builtin_t;
+extern ebfs_builtin_t	pr_ebfs_builtins[];
+extern int				pr_ebfs_numbuiltins;
+#define PR_DEFAULT_FUNCNO_BUILTIN_FIND	100
+extern cvar_t	pr_builtin_find;
+extern cvar_t	pr_builtin_remap;
+#define PR_DEFAULT_FUNCNO_EXTENSION_FIND	99	// 2001-10-20 Extension System by Lord Havoc/Maddes
+// 2001-09-14 Enhanced BuiltIn Function System (EBFS) by Maddes  end
 
 extern int		pr_argc;
 
@@ -134,7 +151,8 @@ extern	qboolean	pr_trace;
 extern	dfunction_t	*pr_xfunction;
 extern	int			pr_xstatement;
 
-extern	unsigned short		pr_crc;
+extern	unsigned short	pr_crc;
+extern func_t	pr_func_endframe;	// 2000-01-02 EndFrame function by Maddes/FrikaC
 
 void PR_RunError (char *error, ...);
 
@@ -142,4 +160,4 @@ void ED_PrintEdicts (void);
 void ED_PrintNum (int ent);
 
 //eval_t *GetEdictFieldValue(edict_t *ed, char *field);
-#define	GETEDICTFIELDVALUE(ed, fieldoffset) (fieldoffset ? (eval_t *)((byte *)&ed->v + fieldoffset) : NULL)
+

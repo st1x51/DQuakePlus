@@ -33,15 +33,138 @@ sfx_t			*cl_sfx_wizhit;
 sfx_t		    *cl_sfx_thunder;
 sfx_t			*cl_sfx_knighthit;
 sfx_t			*cl_sfx_tink1;
+//normal rics
 sfx_t			*cl_sfx_ric1;
 sfx_t			*cl_sfx_ric2;
 sfx_t			*cl_sfx_ric3;
+// wood rics
+sfx_t                   *cl_sfx_wric1;
+sfx_t                   *cl_sfx_wric2;
+sfx_t                   *cl_sfx_wric3;
+// metall rics
+sfx_t                   *cl_sfx_mric1;
+sfx_t                   *cl_sfx_mric2;
+sfx_t                   *cl_sfx_mric3;
+sfx_t                   *cl_sfx_r_exp3;
 sfx_t			*cl_sfx_r_exp3;
 #ifdef QUAKE2
 sfx_t			*cl_sfx_imp;
 sfx_t			*cl_sfx_rail;
 #endif
-
+	
+	//detecting texture code,by Baker,adapted by Ghost_Fang,fixed by st1x
+    msurface_t   *new_collision_wall;       //Baker's, idk
+    msurface_t  *previous_collision_wall;   //Also Bakers, still dunno.
+     
+    char* texturehit = "NULL";              //Ghost Fang. Set a global "texturehit" that will store a texture string
+                                            //Set it NULL to avoid crashing
+     
+    int RecursiveWallPoint (mnode_t *node, vec3_t start, vec3_t end)
+    {
+       float   front, back, frac;
+       vec3_t   mid;
+     
+    loc0:
+       if (node->contents < 0)
+          return false;      // didn't hit anything
+       
+    // calculate mid point
+       if (node->plane->type < 3)
+       {
+          front = start[node->plane->type] - node->plane->dist;
+          back = end[node->plane->type] - node->plane->dist;
+       }
+       else
+       {
+          front = DotProduct(start, node->plane->normal) - node->plane->dist;
+          back = DotProduct(end, node->plane->normal) - node->plane->dist;
+       }
+     
+       // optimized recursion
+       if ((back < 0) == (front < 0))
+       {
+          node = node->children[front < 0];
+          goto loc0;
+       }
+       
+       frac = front / (front-back);
+       mid[0] = start[0] + (end[0] - start[0]) * frac;
+       mid[1] = start[1] + (end[1] - start[1]) * frac;
+       mid[2] = start[2] + (end[2] - start[2]) * frac;
+       
+    // go down front side
+       if (RecursiveWallPoint(node->children[front < 0], start, mid))
+       {
+          return true;   // hit something
+       }
+       else
+       {
+          int      i, ds, dt;
+          msurface_t   *surf;
+     
+       // check for impact on this node
+          //VectorCopy (mid, lightspot);
+     
+          surf = cl.worldmodel->surfaces + node->firstsurface;
+          for (i = 0 ; i < node->numsurfaces ; i++, surf++)
+          {
+     
+             ds = (int)((float)DotProduct (mid, surf->texinfo->vecs[0]) + surf->texinfo->vecs[0][3]);
+             dt = (int)((float)DotProduct (mid, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3]);
+     
+             if (ds < surf->texturemins[0] || dt < surf->texturemins[1])
+                continue;
+             
+             ds -= surf->texturemins[0];
+             dt -= surf->texturemins[1];
+             
+             if (ds > surf->extents[0] || dt > surf->extents[1])
+                continue;
+     
+             // At this point we have a collision with this surface
+             new_collision_wall = surf;
+     
+             return true;   // success
+          }
+     
+       // go down back side
+          return RecursiveWallPoint (node->children[front >= 0], mid, end);
+       }
+    }
+     
+    int R_SurfacePoint ()
+    {  
+       vec3_t      player;
+       vec3_t      forward, up, right;
+       vec3_t      destination;
+       int         texturenum;
+     
+       qboolean      changed=false;
+       
+       VectorCopy (r_refdef.vieworg, player);            // Player eye position
+       AngleVectors (cl.viewangles, forward, right, up);   // Take into account the angles
+       VectorMA (player, 4096, forward, destination);            // Walk us forward
+       
+       new_collision_wall = NULL;   // Set to null
+     
+       texturenum = RecursiveWallPoint (cl.worldmodel->nodes, player, destination);
+      
+       // If there is a collision wall AND either there is no previous or the previous doesn't match, we have a change.
+       changed = (new_collision_wall && (!previous_collision_wall || (previous_collision_wall != new_collision_wall)));
+     
+       if (previous_collision_wall && changed)
+       {
+  		  previous_collision_wall = NULL;
+       }
+       
+       if (new_collision_wall && changed)
+       {
+          previous_collision_wall = new_collision_wall;
+          texturehit = previous_collision_wall->texinfo->texture->name;
+       }
+     
+       return texturenum;
+    }
 /*
 =================
 CL_ParseTEnt
@@ -52,11 +175,20 @@ void CL_InitTEnts (void)
 	cl_sfx_wizhit = S_PrecacheSound ("wizard/hit.wav");
 	cl_sfx_knighthit = S_PrecacheSound ("hknight/hit.wav");
 	cl_sfx_tink1 = S_PrecacheSound ("weapons/tink1.wav");
-	cl_sfx_ric1 = S_PrecacheSound ("weapons/ric1.wav");
-	cl_sfx_ric2 = S_PrecacheSound ("weapons/ric2.wav");
-	cl_sfx_ric3 = S_PrecacheSound ("weapons/ric3.wav");
 	cl_sfx_r_exp3 = S_PrecacheSound ("weapons/r_exp3.wav");
     cl_sfx_thunder	= S_PrecacheSound ("ambience/thunder1.wav");
+	//normal rics
+	cl_sfx_ric1 = S_PrecacheSound ("weapons/rics/ric1.wav");
+	cl_sfx_ric2 = S_PrecacheSound ("weapons/rics/ric2.wav");
+	cl_sfx_ric3 = S_PrecacheSound ("weapons/rics/ric3.wav");
+    // wood rics
+    cl_sfx_wric1 = S_PrecacheSound ("weapons/rics/wood_ric1.wav");
+    cl_sfx_wric2 = S_PrecacheSound ("weapons/rics/wood_ric2.wav");
+    cl_sfx_wric3 = S_PrecacheSound ("weapons/rics/wood_ric3.wav");
+    // metall rics
+    cl_sfx_mric1 = S_PrecacheSound ("weapons/rics/metal_ric1.wav");
+    cl_sfx_mric2 = S_PrecacheSound ("weapons/rics/metal_ric2.wav");
+    cl_sfx_mric3 = S_PrecacheSound ("weapons/rics/metal_ric3.wav");	
 #ifdef QUAKE2
 	cl_sfx_imp = S_PrecacheSound ("shambler/sattck1.wav");
 	cl_sfx_rail = S_PrecacheSound ("weapons/lstart.wav");
@@ -247,18 +379,49 @@ void CL_ParseTEnt (void)
 		pos[0] = MSG_ReadCoord ();
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
+		R_SurfacePoint();
         if (r_part_gunshots.value == 2 && !cl_q3gunshot_mod)
 			cl_q3gunshot_mod = Mod_ForName ("progs/bullet.md3", true);
-
+                if(!Q_strncmp(texturehit,"sky",3) )                             //Don't draw decals or sparks on the skybox
+        break;
 		//R00k--start
 		if (r_decal_bullets.value)
 		{
 			R_SpawnDecalStatic(pos, decal_mark, 8);
-		}
+	}
 		//R00k--end
-		R_RunParticleEffect (pos, vec3_origin, 0, 20);
-		break;
-		
+                if(!Q_strncmp(texturehit,"metal",5) )
+                {
+                        rnd = rand() & 3;
+                        if (rnd == 1)
+                                S_StartSound (-1, 0, cl_sfx_mric1, pos, 1, 1);
+                        else if (rnd == 2)
+                                S_StartSound (-1, 0, cl_sfx_mric2, pos, 1, 1);
+                        else
+                                S_StartSound (-1, 0, cl_sfx_mric3, pos, 1, 1);
+                } 
+            else if(!Q_strncmp(texturehit,"wood",4) )
+                {
+                        rnd = rand() & 3;  
+                        if (rnd == 1)
+                                S_StartSound (-1, 0, cl_sfx_wric1, pos, 1, 1);
+                        else if (rnd == 2)
+                                S_StartSound (-1, 0, cl_sfx_wric2, pos, 1, 1);
+                        else
+                                S_StartSound (-1, 0, cl_sfx_wric3, pos, 1, 1);
+                }
+                else
+                {
+                        rnd = rand() & 3;
+                        if (rnd == 1)
+                                S_StartSound (-1, 0, cl_sfx_ric1, pos, 1, 1);
+                        else if (rnd == 2)
+                                S_StartSound (-1, 0, cl_sfx_ric2, pos, 1, 1);
+                        else
+                                S_StartSound (-1, 0, cl_sfx_ric3, pos, 1, 1);
+                }
+		R_RunParticleEffect (pos, vec3_origin, 0, 20);	
+	break;	
 	case TE_EXPLOSION:			// rocket explosion
 		pos[0] = MSG_ReadCoord ();
 		pos[1] = MSG_ReadCoord ();

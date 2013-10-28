@@ -791,7 +791,25 @@ void Mod_LoadLighting (lump_t *l)
         // LordHavoc: .lit support end
 
 }
+/*
+=================
+Mod_HL_LoadLighting
+=================
+*/
+void Mod_HL_LoadLighting (lump_t *l)
+{
 
+    LIGHTMAP_BYTES = 4;
+
+	if (!l->filelen)
+	{
+		loadmodel->lightdata = NULL;
+		return;
+	}
+
+	loadmodel->lightdata = static_cast<byte*>(Hunk_AllocName ( l->filelen, loadname));
+	memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
+}
 /*
 =================
 Mod_LoadVisibility
@@ -1635,7 +1653,15 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
     loading_cur_step[map_lev]++;
 	SCR_UpdateScreen ();
 
-	Mod_LoadLighting (&header->lumps[LUMP_LIGHTING]);
+	Mod_LoadTextures (&header->lumps[LUMP_TEXTURES]);
+    if(mod->bspversion == HL_BSPVERSION)
+	{
+    	Mod_HL_LoadLighting (&header->lumps[LUMP_LIGHTING]);
+    }
+    else
+    {
+		Mod_LoadLighting (&header->lumps[LUMP_LIGHTING]);
+    }
 
     loading_cur_step[map_lev]++;
 	SCR_UpdateScreen ();

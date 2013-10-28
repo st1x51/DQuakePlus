@@ -44,7 +44,7 @@ cvar_t	sv_stopspeed = {"sv_stopspeed","100"};
 cvar_t	sv_gravity = {"sv_gravity","800",false,true};
 cvar_t	sv_maxvelocity = {"sv_maxvelocity","2000"};
 cvar_t	sv_nostep = {"sv_nostep","0"};
-
+cvar_t	sv_freezenonclients = {"sv_freezenonclients","0",false,false};
 #ifdef QUAKE2
 static	vec3_t	vec_origin = {0.0, 0.0, 0.0};
 #endif
@@ -565,27 +565,27 @@ SV_PushRotate
 */
 void SV_PushRotate (edict_t *pusher, float movetime)
 {
-	int			i, e;
-	edict_t		*check, *block;
-	vec3_t		move, a, amove;
-	vec3_t		entorig, pushorig;
-	int			num_moved;
-	edict_t		*moved_edict[MAX_EDICTS];
-	vec3_t		moved_from[MAX_EDICTS];
-	vec3_t		org, org2;
-	vec3_t		forward, right, up;
+   int         i, e;
+   edict_t      *check, *block;
+   vec3_t      move, a, amove;
+   vec3_t      entorig, pushorig;
+   int         num_moved;
+   edict_t      *moved_edict[MAX_EDICTS];
+   vec3_t      moved_from[MAX_EDICTS];
+   vec3_t      org, org2;
+   vec3_t      forward, right, up;
 
-	if (!pusher->v.avelocity[0] && !pusher->v.avelocity[1] && !pusher->v.avelocity[2])
-	{
-		pusher->v.ltime += movetime;
-		return;
-	}
+   if (!pusher->v.avelocity[0] && !pusher->v.avelocity[1] && !pusher->v.avelocity[2])
+   {
+      pusher->v.ltime += movetime;
+      return;
+   }
 
-	for (i=0 ; i<3 ; i++)
-		amove[i] = pusher->v.avelocity[i] * movetime;
+   for (i=0 ; i<3 ; i++)
+      amove[i] = pusher->v.avelocity[i] * movetime;
 
-	VectorSubtract (vec3_origin, amove, a);
-	AngleVectors (a, forward, right, up);
+   VectorSubtract (vec3_origin, amove, a);
+   AngleVectors (a, forward, right, up);
 
 	VectorCopy (pusher->v.angles, pushorig);
 	
@@ -727,7 +727,14 @@ void SV_Physics_Pusher (edict_t *ent)
             SV_PushRotate (ent, host_frametime);
 		
         if (movetime)
+		{
+		//ROTATE START
+		if ((ent->v.avelocity[0] || ent->v.avelocity[1] || ent->v.avelocity[2]) && ent->v.solid == SOLID_BSP)
+		SV_PushRotate (ent, host_frametime);
+		else
+		//ROTATE END
             SV_PushMove (ent, movetime);	// advances ent->v.ltime if not blocked
+		}
 
 		
 	if (thinktime > oldltime && thinktime <= ent->v.ltime)
@@ -740,10 +747,51 @@ void SV_Physics_Pusher (edict_t *ent)
 		if (ent->free)
 			return;
 	}
-
 }
+/*
+=============
+SV_Physics_Follow
 
+Entities that are "stuck" to another entity
+=============
+*/// from DarkPlaces
 
+void SV_Physics_Follow (edict_t *ent)
+{
+	vec3_t vf, vr, vu, angles, v;
+	edict_t *e;
+
+	// regular thinking
+	if (!SV_RunThink (ent))
+		return;
+
+	// LordHavoc: implemented rotation on MOVETYPE_FOLLOW objects
+	e = PROG_TO_EDICT(ent->v.aiment);
+	if (e->v.angles[0] == ent->v.punchangle[0] && e->v.angles[1] == ent->v.punchangle[1] && e->v.angles[2] == ent->v.punchangle[2])
+	{
+		// quick case for no rotation
+		VectorAdd(e->v.origin, ent->v.view_ofs, ent->v.origin);
+	}
+	else
+	{
+		angles[0] = -ent->v.punchangle[0];
+		angles[1] =  ent->v.punchangle[1];
+		angles[2] =  ent->v.punchangle[2];
+		AngleVectors (angles, vf, vr, vu);
+		v[0] = ent->v.view_ofs[0] * vf[0] + ent->v.view_ofs[1] * vr[0] + ent->v.view_ofs[2] * vu[0];
+		v[1] = ent->v.view_ofs[0] * vf[1] + ent->v.view_ofs[1] * vr[1] + ent->v.view_ofs[2] * vu[1];
+		v[2] = ent->v.view_ofs[0] * vf[2] + ent->v.view_ofs[1] * vr[2] + ent->v.view_ofs[2] * vu[2];
+		angles[0] = -e->v.angles[0];
+		angles[1] =  e->v.angles[1];
+		angles[2] =  e->v.angles[2];
+		AngleVectors (angles, vf, vr, vu);
+		ent->v.origin[0] = v[0] * vf[0] + v[1] * vf[1] + v[2] * vf[2] + e->v.origin[0];
+		ent->v.origin[1] = v[0] * vr[0] + v[1] * vr[1] + v[2] * vr[2] + e->v.origin[1];
+		ent->v.origin[2] = v[0] * vu[0] + v[1] * vu[1] + v[2] * vu[2] + e->v.origin[2];
+	}
+	VectorAdd (e->v.angles, ent->v.v_angle, ent->v.angles);
+	SV_LinkEdict (ent, true);
+}
 /*
 ===============================================================================
 
@@ -1084,6 +1132,10 @@ void SV_Physics_Client (edict_t	*ent, int num)
 			return;
 		break;
 
+	case MOVETYPE_FOLLOW://R00k: from DarkPlaces
+		SV_Physics_Follow (ent);
+		break;
+
 	case MOVETYPE_WALK:
 		if (!SV_RunThink (ent))
 			return;
@@ -1145,23 +1197,6 @@ void SV_Physics_None (edict_t *ent)
 // regular thinking
 	SV_RunThink (ent);
 }
-
-
-/*
-=============
-SV_Physics_Follow
-
-Entities that are "stuck" to another entity
-=============
-*/
-void SV_Physics_Follow (edict_t *ent)
-{
-// regular thinking
-	SV_RunThink (ent);
-	VectorAdd (PROG_TO_EDICT(ent->v.aiment)->v.origin, ent->v.v_angle, ent->v.origin);
-	SV_LinkEdict (ent, true);
-}
-
 
 /*
 =============
@@ -1508,8 +1543,9 @@ SV_Physics
 */
 void SV_Physics (void)
 {
-	int		i;
+	int		i, cap_edicts;
 	edict_t	*ent;
+	extern dfunction_t *EndFrameQC;
 
 // let the progs know that a new frame has started
 	pr_global_struct->self = EDICT_TO_PROG(sv.edicts);
@@ -1523,7 +1559,13 @@ void SV_Physics (void)
 // treat each object in turn
 //
 	ent = sv.edicts;
-	for (i=0 ; i<sv.num_edicts ; i++, ent = NEXT_EDICT(ent))
+
+	cap_edicts = sv.num_edicts;
+
+	if (sv_freezenonclients.value)
+		cap_edicts = svs.maxclients + 1;
+
+	for (i = 0 ; i < cap_edicts ; i++, ent = NEXT_EDICT(ent))
 	{
 		if (ent->free)
 			continue;
@@ -1562,7 +1604,16 @@ void SV_Physics (void)
 	if (pr_global_struct->force_retouch)
 		pr_global_struct->force_retouch--;	
 
-	sv.time += host_frametime;
+	// LordHavoc: endframe support
+	if (EndFrameQC)
+	{
+		pr_global_struct->self = EDICT_TO_PROG(sv.edicts);
+		pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
+		pr_global_struct->time = sv.time;
+		PR_ExecuteProgram ((func_t)(EndFrameQC - pr_functions));
+	}
+
+		sv.time += host_frametime;
 }
 
 trace_t SV_Trace_Toss (edict_t *ent, edict_t *ignore)
