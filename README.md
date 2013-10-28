@@ -43,8 +43,8 @@ How to compile
 ==========
 Transparency
 ==========
-use prefix "{" for transparency like in HalfLife and like Kurok(see kurok.wad for example)  
-R:159 G:091 B:083 for transparent textures like a Kurok
-R:0 G:0 B:255 for transparent textures like a Half Life
-little example:
-{mytexture
+use prefix "{" for transparency like in HalfLife and like Kurok(see kurok.wad for example)     
+R:159 G:091 B:083 for transparent textures like a Kurok      
+R:0 G:0 B:255 for transparent textures like a Half Life      
+little example:      
+{mytexture     
