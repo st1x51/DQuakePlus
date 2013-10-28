@@ -367,7 +367,7 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 			if (!buf)
 			{
 				if (crash)
-					Sys_Error ("Mod_NumForName: %s not found", mod->name);
+					Con_Printf ("Mod_LoadModel: %s not found\n", mod->name);
 				return NULL;
 			}
 		}
