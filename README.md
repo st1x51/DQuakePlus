@@ -35,8 +35,8 @@ How to compile
 
 4)Type "cd" and path to psp folder with make files,like a "cd dquakeplus/psp"
 
-5)To compile SLIM EBOOT type "cd makeslim install"
+5)To compile SLIM EBOOT type "make -f  makeslim install"
 
-  To compile PHAT EBOOT type "cd makephat install"
+  To compile PHAT EBOOT type "make -f makephat install"
   
 6)Profit
