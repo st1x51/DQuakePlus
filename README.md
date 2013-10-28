@@ -26,7 +26,7 @@ Features:
 - usermaps browser    
 - nodrawtoclient, drawonlytoclient    
 - .ent file support    
-
+- ricochets   
 
 ==========
 How to compile
@@ -51,4 +51,20 @@ R:159 G:091 B:083 for transparent textures like a Kurok
 R:0 G:0 B:255 for transparent textures like a Half Life      
 little example:      
 {mytexture     
-For transparent parts on models you need add your models in engine(see DQ+ note in video_hardware_main in psp folder)   
+For transparent parts on models you need add your models in engine(see DQ+ note in video_hardware_main in psp folder)
+==========
+Ricochets
+==========
+Must be here    
+//normal rics    
+weapons/rics/ric1.wav   
+weapons/rics/ric2.wav   
+weapons/rics/ric3.wav   
+// wood rics   
+weapons/rics/wood_ric1.wav   
+weapons/rics/wood_ric2.wav   
+weapons/rics/wood_ric3.wav   
+// metall rics  
+weapons/rics/metal_ric1.wav   
+weapons/rics/metal_ric2.wav   
+weapons/rics/metal_ric3.wav   
