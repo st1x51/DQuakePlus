@@ -23,7 +23,8 @@ Features:
 - skybox from kurok
 - color lightmaps (from kurok / and for hlbsp);
 - fog
-
+- usermaps browser    
+- nodrawtoclient, drawonlytoclient    
 ==========
 How to compile
 ==========
