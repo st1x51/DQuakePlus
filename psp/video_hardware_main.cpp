@@ -1657,7 +1657,7 @@ void R_SetupQ2AliasFrame (entity_t *e, md2_t *pheader)
 			lerp = 0;
 		}
 		else
-			lerp = (cl.time - e->draw_lerpstart) * 20.0;
+			lerp = (cl.time - e->draw_lerpstart) * 10.0; //dr_mabuse1981: lowered abit, so MD2s will look better
 	}
 	else // uninitialized
 	{
