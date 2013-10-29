@@ -367,20 +367,29 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 			if (!buf)
 			{
 				if (crash)
-					Con_Printf ("Mod_LoadModel: %s not found\n", mod->name);
+					Sys_Error ("Mod_NumForName: %s not found", mod->name);
 				return NULL;
 			}
 		}
 	}
 	else
 	{
-	   buf = (unsigned *)COM_LoadStackFile (mod->name, stackbuf, sizeof(stackbuf));
-	   if (!buf)
-	   {
-		if (crash)
-			Sys_Error ("Mod_NumForName: %s not found", mod->name);
-		return NULL;
-	   }
+		buf = (unsigned *)COM_LoadStackFile (mod->name, stackbuf, sizeof(stackbuf));
+	    if (!buf && crash)
+		{
+			// Reload with another .mdl
+			buf = (unsigned *)COM_LoadStackFile("progs/missing_model.mdl", stackbuf, sizeof(stackbuf));
+			if (buf)
+			{
+				Con_Printf ("Missing model %s , using placeholder\n", mod->name);
+			}
+		}
+		if (!buf)
+		{
+			if (crash)
+				Sys_Error ("Mod_NumForName: %s not found", mod->name);
+			return NULL;
+		}
 	}
 //
 // allocate a new model
