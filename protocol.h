@@ -139,6 +139,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define svc_sellscreen		33
 
 #define svc_cutscene		34
+#define	svc_showlmp		    35	// [string] slotname [string] lmpfilename [coord] x [coord] y
+#define	svc_hidelmp		    36	// [string] slotname
 #define	svc_skybox		    37	    // [string] skyname
 #define svc_fog				41		// [byte] start [byte] end [byte] red [byte] green [byte] blue [float] time
 #define	svc_bspdecal        42      // [string] name [byte] decal_size [coords] pos

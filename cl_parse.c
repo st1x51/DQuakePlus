@@ -67,8 +67,8 @@ char *svc_strings[] =
 	"svc_cdtrack",			// [byte] track [byte] looptrack
 	"svc_sellscreen",
 	"svc_cutscene",
-	"",
-	"",
+	"svc_showlmp",		// [string] iconlabel [string] lmpfile [byte] x [byte] y
+	"svc_hidelmp",		// [string] iconlabel
 	"svc_skybox",		   // [string] skyname
 	"",
 	"",
@@ -78,7 +78,86 @@ char *svc_strings[] =
 };
 
 //=============================================================================
+#define SHOWLMP_MAXLABELS	256
+typedef struct showlmp_s
+{
+	qboolean	isactive;
+	float		x, y;
+	char		label[32];
+	char		pic[128];
+} showlmp_t;
 
+showlmp_t	showlmp[SHOWLMP_MAXLABELS];
+
+void SHOWLMP_decodehide (void)
+{
+	int	i;
+	byte	*lmplabel;
+
+	lmplabel = MSG_ReadString ();
+	for (i=0 ; i<SHOWLMP_MAXLABELS ; i++)
+	{
+		if (showlmp[i].isactive && !strcmp(showlmp[i].label, lmplabel))
+		{
+			showlmp[i].isactive = false;
+			return;
+		}
+	}
+}
+
+void SHOWLMP_decodeshow (void)
+{
+	int	i, k;
+	byte	lmplabel[256], picname[256];
+	float	x, y;
+
+	strcpy (lmplabel, MSG_ReadString());
+	strcpy (picname, MSG_ReadString());
+	x = MSG_ReadByte ();
+	y = MSG_ReadByte ();
+	k = -1;
+	for (i=0 ; i<SHOWLMP_MAXLABELS ; i++)
+	{
+		if (showlmp[i].isactive)
+		{
+			if (!strcmp(showlmp[i].label, lmplabel))
+			{
+				k = i;
+				break;	// drop out to replace it
+			}
+		}
+		else if (k < 0)	// find first empty one to replace
+		{
+			k = i;
+		}
+	}
+
+	if (k < 0)
+		return;	// none found to replace
+	// change existing one
+	showlmp[k].isactive = true;
+	strcpy (showlmp[k].label, lmplabel);
+	strcpy (showlmp[k].pic, picname);
+	showlmp[k].x = x;
+	showlmp[k].y = y;
+}
+
+void SHOWLMP_drawall (void)
+{
+	int	i;
+
+	for (i=0 ; i<SHOWLMP_MAXLABELS ; i++)
+		if (showlmp[i].isactive)
+			Draw_TransPic (showlmp[i].x, showlmp[i].y, Draw_CachePic(showlmp[i].pic));
+}
+
+void SHOWLMP_clear (void)
+{
+	int	i;
+
+	for (i=0 ; i<SHOWLMP_MAXLABELS ; i++)
+		showlmp[i].isactive = false;
+}
 /*
 ===============
 CL_EntityNum
@@ -1199,6 +1278,13 @@ void CL_ParseServerMessage (void)
         case svc_bspdecal:
 			CL_ParseBSPDecal ();
 			break;
+		case svc_hidelmp:
+			SHOWLMP_decodehide ();
+			break;
+
+		case svc_showlmp:
+			SHOWLMP_decodeshow ();
+			break;	
 		}
 	}
 }
