@@ -1917,7 +1917,18 @@ void PF_sqrt (void)
 {
 	G_FLOAT(OFS_RETURN) = sqrtf(G_FLOAT(OFS_PARM0));
 }
+void PF_randomvec (void)
+{
+	vec3_t          temp;
 
+	do
+	{
+	temp[0] = (rand () & 32767) * (2.0 / 32767.0) - 1.0;
+	temp[1] = (rand () & 32767) * (2.0 / 32767.0) - 1.0;
+	temp[2] = (rand () & 32767) * (2.0 / 32767.0) - 1.0;
+	} while (DotProduct (temp, temp) >= 1);
+	VectorCopy (temp, G_VECTOR (OFS_RETURN));
+}
 void PF_Fixme (void)
 {
 	//PR_RunError ("unimplemented bulitin");
@@ -2302,6 +2313,7 @@ ebfs_builtin_t pr_ebfs_builtins[] =
 	{  81, "stof", PF_stof },	// 2001-09-20 QuakeC string manipulation by FrikaC/Maddes
 // 2001-09-20 QuakeC file access by FrikaC/Maddes  start
 	{  90, "tracebox", PF_tracebox },
+	{  91, "randomvec", PF_randomvec },
 	{ 110, "fopen", PF_fopen },
 	{ 111, "fclose", PF_fclose },
 	{ 112, "fgets", PF_fgets },
