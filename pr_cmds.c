@@ -266,6 +266,47 @@ void PF_setsize (void)
 	SetMinMaxSize (e, min, max, false);
 }
 
+/*
+=================
+PF_tracebox
+
+Used for use tracing and shot targeting
+Traces are blocked by bbox and exact bsp entityes, and also slide box entities
+if the tryents flag is set.
+
+tracebox (vector1, vector2, vector3, vector4, tryents)
+=================
+*/
+void PF_tracebox (void)
+{
+	float	*v1, *v2;
+	float	*mins, *maxs;
+	trace_t	trace;
+	int	nomonsters;
+	edict_t	*ent;
+
+	v1 = G_VECTOR(OFS_PARM0);
+	mins = G_VECTOR(OFS_PARM1);
+	maxs = G_VECTOR(OFS_PARM2);
+	v2 = G_VECTOR(OFS_PARM3);
+	nomonsters = G_FLOAT(OFS_PARM4);
+	ent = G_EDICT(OFS_PARM5);
+
+	trace = SV_Move (v1, mins, maxs, v2, nomonsters, ent);
+
+	pr_global_struct->trace_allsolid = trace.allsolid;
+	pr_global_struct->trace_startsolid = trace.startsolid;
+	pr_global_struct->trace_fraction = trace.fraction;
+	pr_global_struct->trace_inwater = trace.inwater;
+	pr_global_struct->trace_inopen = trace.inopen;
+	VectorCopy (trace.endpos, pr_global_struct->trace_endpos);
+	VectorCopy (trace.plane.normal, pr_global_struct->trace_plane_normal);
+	pr_global_struct->trace_plane_dist =  trace.plane.dist;
+	if (trace.ent)
+		pr_global_struct->trace_ent = EDICT_TO_PROG(trace.ent);
+	else
+		pr_global_struct->trace_ent = EDICT_TO_PROG(sv.edicts);
+}
 
 /*
 =================
@@ -2260,6 +2301,7 @@ ebfs_builtin_t pr_ebfs_builtins[] =
 	{  78, "setspawnparms", PF_setspawnparms },
 	{  81, "stof", PF_stof },	// 2001-09-20 QuakeC string manipulation by FrikaC/Maddes
 // 2001-09-20 QuakeC file access by FrikaC/Maddes  start
+	{  90, "tracebox", PF_tracebox },
 	{ 110, "fopen", PF_fopen },
 	{ 111, "fclose", PF_fclose },
 	{ 112, "fgets", PF_fgets },
