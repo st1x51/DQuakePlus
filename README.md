@@ -29,7 +29,7 @@ Features:
 - ricochets   
 - FRIK_FILE support   
 - Rotation brush support    
-- MOVETYPE_FOLLOW implemented  
+- MOVETYPE_FOLLOW & MOVETYPE_COMPOUND implemented     
 - qcexec   
 - sv_freezenonclients    
 
@@ -89,3 +89,12 @@ hole.aiment = bmodel;            // make the hole follow bmodel
 hole.punchangle = bmodel.angles; // the original angles of bmodel   
 hole.view_ofs = hole.origin - bmodel.origin; // relative origin   
 hole.v_angle = hole.angles - bmodel.angles;  // relative angles   
+
+=========
+MOVETYPE_COMPOUND
+=========
+It allows to tie one entity to another, taking into account movement and rotation of the former entity.   
+
+
+
+
