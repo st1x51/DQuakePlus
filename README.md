@@ -29,7 +29,7 @@ Features:
 - ricochets   
 - FRIK_FILE support   
 - Rotation brush support    
-- MOVETYPE_FOLLOW implemented (not tested)   
+- MOVETYPE_FOLLOW implemented  
 - qcexec   
 - sv_freezenonclients    
 
