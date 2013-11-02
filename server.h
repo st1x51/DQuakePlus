@@ -127,6 +127,7 @@ typedef struct client_s
 #define	MOVETYPE_BOUNCE			10
 #define MOVETYPE_BOUNCEMISSILE	11		// bounce w/o gravity
 #define MOVETYPE_FOLLOW			12		// track movement of aiment
+#define MOVETYPE_COMPOUND		13		// glue two entities together (simple movewith)
 
 
 // edict->solid values

@@ -30,7 +30,7 @@ typedef byte byte_vec4_t[4];
 typedef	int	fixed4_t;
 typedef	int	fixed8_t;
 typedef	int	fixed16_t;
-
+typedef vec_t matrix4x4[4][4];
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
@@ -54,11 +54,18 @@ extern	int nanmask;
 #ifndef M_PI
 #define M_PI = GU_PI	// matches value in gcc v2 math.h
 #endif
-
+/*
 #define M_PI_DIV_180 (M_PI / 180.0) //johnfitz
 //#define DEG2RAD( a ) ( a * M_PI ) / 180.0F
 #define DEG2RAD( a ) ( (a) * M_PI_DIV_180 ) //johnfitz
 //#endif
+*/
+// g-cont. convert radians to degrees and back
+#define RAD2DEG( x )	((float)(x) * (float)(180.f / M_PI))
+#define DEG2RAD( x )	((float)(x) * (float)(M_PI / 180.f))
+
+#define M_PI_DIV_180	(M_PI / 180.0) //johnfitz
+
 
 #define CLAMP(min, x, max) ((x) < (min) ? (min) : (x) > (max) ? (max) : (x)) //johnfitz
 
@@ -66,6 +73,7 @@ extern	int nanmask;
 
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
+#define VectorIsNull( v ) ((v)[0] == 0.0f && (v)[1] == 0.0f && (v)[2] == 0.0f)
 #define DotProduct(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
 #define VectorAdd(a,b,c) {c[0]=a[0]+b[0];c[1]=a[1]+b[1];c[2]=a[2]+b[2];}
@@ -74,7 +82,7 @@ extern	int nanmask;
 #define VectorNegate(a, b)	((b)[0] = -(a)[0], (b)[1] = -(a)[1], (b)[2] = -(a)[2])
 #define VectorSet(v, x, y, z)	((v)[0] = (x), (v)[1] = (y), (v)[2] = (z))
 #define VectorRandom(v) {do{(v)[0] = lhrandom(-1, 1);(v)[1] = lhrandom(-1, 1);(v)[2] = lhrandom(-1, 1);}while(DotProduct(v, v) > 1);}
-
+#define VectorLerp( v1, lerp, v2, c ) ((c)[0] = (v1)[0] + (lerp) * ((v2)[0] - (v1)[0]), (c)[1] = (v1)[1] + (lerp) * ((v2)[1] - (v1)[1]), (c)[2] = (v1)[2] + (lerp) * ((v2)[2] - (v1)[2]))
 #define VSM(a,b,c) {c[0]=a[0]*b;c[1]=a[1]*b;c[2]=a[2]*b;}
 
 // MDave -- courtesy of johnfitz, lordhavoc
@@ -123,7 +131,7 @@ int GreatestCommonDivisor (int i1, int i2);
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
 float	anglemod(float a);
-
+void SinCos( float radians, float *sine, float *cosine );
 #define VectorL2Compare(v, w, m)					\
 	(_mathlib_temp_float1 = (m) * (m),				\
 	_mathlib_temp_vec1[0] = (v)[0] - (w)[0], _mathlib_temp_vec1[1] = (v)[1] - (w)[1], _mathlib_temp_vec1[2] = (v)[2] - (w)[2],\
@@ -196,3 +204,19 @@ void VectorTransform (const vec3_t in1, matrix3x4 in2, vec3_t out);
 extern int _mathlib_temp_int1, _mathlib_temp_int2, _mathlib_temp_int3;
 extern float _mathlib_temp_float1, _mathlib_temp_float2, _mathlib_temp_float3;
 extern vec3_t _mathlib_temp_vec1, _mathlib_temp_vec2, _mathlib_temp_vec3;
+//
+// matrixlib
+//
+#define Matrix4x4_LoadIdentity( mat )	Matrix4x4_Copy( mat, matrix4x4_identity )
+#define Matrix4x4_Copy( out, in )	Q_memcpy( out, in, sizeof( matrix4x4 ))
+
+void Matrix4x4_VectorTransform( const matrix4x4 in, const float v[3], float out[3] );
+void Matrix4x4_VectorITransform( const matrix4x4 in, const float v[3], float out[3] );
+void Matrix4x4_VectorRotate( const matrix4x4 in, const float v[3], float out[3] );
+void Matrix4x4_VectorIRotate( const matrix4x4 in, const float v[3], float out[3] );
+void Matrix4x4_CreateFromEntity( matrix4x4 out, const vec3_t angles, const vec3_t origin, float scale );
+void Matrix4x4_TransformPositivePlane( const matrix4x4 in, const vec3_t normal, float d, vec3_t out, float *dist );
+void Matrix4x4_ConvertToEntity( const matrix4x4 in, vec3_t angles, vec3_t origin );
+void Matrix4x4_ConcatTransforms( matrix4x4 out, const matrix4x4 in1, const matrix4x4 in2 );
+void Matrix4x4_Invert_Simple( matrix4x4 out, const matrix4x4 in1 );
+

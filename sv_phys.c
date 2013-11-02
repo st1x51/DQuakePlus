@@ -73,7 +73,9 @@ void SV_CheckAllEnts (void)
 		|| check->v.movetype == MOVETYPE_NONE
 
 		|| check->v.movetype == MOVETYPE_FOLLOW
-
+		
+		|| check->v.movetype == MOVETYPE_COMPOUND
+		
 		|| check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
@@ -477,9 +479,9 @@ void SV_PushMove (edict_t *pusher, float movetime)
 			continue;
 		if (check->v.movetype == MOVETYPE_PUSH
 		|| check->v.movetype == MOVETYPE_NONE
-#ifdef QUAKE2
+//#ifdef QUAKE2
 		|| check->v.movetype == MOVETYPE_FOLLOW
-#endif
+//#endif
 		|| check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
@@ -607,7 +609,9 @@ void SV_PushRotate (edict_t *pusher, float movetime)
 		|| check->v.movetype == MOVETYPE_NONE
 
 		|| check->v.movetype == MOVETYPE_FOLLOW
-
+		
+		|| check->v.movetype == MOVETYPE_COMPOUND
+		
 		|| check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
@@ -791,6 +795,64 @@ void SV_Physics_Follow (edict_t *ent)
 	}
 	VectorAdd (e->v.angles, ent->v.v_angle, ent->v.angles);
 	SV_LinkEdict (ent, true);
+}
+
+/*
+=============
+SV_Physics_Compound
+
+a glue two entities together
+=============
+*/
+void SV_Physics_Compound( edict_t *ent )
+{
+	edict_t	*e;
+	
+	// regular thinking
+	if( !SV_RunThink( ent )) return;
+
+	e = PROG_TO_EDICT(ent->v.aiment);
+	
+	if( ent->v.solid != SOLID_TRIGGER )
+		ent->v.solid = SOLID_NOT;
+
+	// not initialized ?
+	if( ent->v.ltime == 0.0f )
+	{
+		VectorCopy( e->v.origin, ent->v.oldorigin );
+		VectorCopy( e->v.angles, ent->v.avelocity );
+		ent->v.ltime = host_frametime;
+		return;
+	}
+
+	if( !VectorCompare( e->v.origin, ent->v.oldorigin ) || !VectorCompare( e->v.angles, ent->v.avelocity ))
+	{
+		matrix4x4	start_l, end_l, temp_l, child;
+
+		// create parent old position
+		Matrix4x4_CreateFromEntity( temp_l, ent->v.avelocity, ent->v.oldorigin, 1.0f );
+		Matrix4x4_Invert_Simple( start_l, temp_l );
+
+		// create parent actual position
+		Matrix4x4_CreateFromEntity( end_l, e->v.angles, e->v.origin, 1.0f );
+
+		// create child actual position
+		Matrix4x4_CreateFromEntity( child, ent->v.angles, ent->v.origin, 1.0f );
+
+		// transform child from start to end
+		Matrix4x4_ConcatTransforms( temp_l, start_l, child );
+		Matrix4x4_ConcatTransforms( child, end_l, temp_l );
+
+		// create child final position
+		Matrix4x4_ConvertToEntity( child, ent->v.angles, ent->v.origin );
+	}
+
+	// notsolid ents never touch triggers
+	SV_LinkEdict( ent, (ent->v.solid == SOLID_NOT) ? false : true );
+
+	// shuffle states
+	VectorCopy( e->v.origin, ent->v.oldorigin );
+	VectorCopy( e->v.angles, ent->v.avelocity );
 }
 /*
 ===============================================================================
@@ -1132,10 +1194,14 @@ void SV_Physics_Client (edict_t	*ent, int num)
 			return;
 		break;
 
-	case MOVETYPE_FOLLOW://R00k: from DarkPlaces
+	case MOVETYPE_FOLLOW: //R00k: from DarkPlaces
 		SV_Physics_Follow (ent);
 		break;
-
+		
+	case MOVETYPE_COMPOUND:
+		SV_Physics_Compound(ent);
+		break;	
+		
 	case MOVETYPE_WALK:
 		if (!SV_RunThink (ent))
 			return;
@@ -1585,6 +1651,8 @@ void SV_Physics (void)
 		else if (ent->v.movetype == MOVETYPE_FOLLOW)
 			SV_Physics_Follow (ent);
 //#endif
+		else if (ent->v.movetype == MOVETYPE_COMPOUND)
+			SV_Physics_Compound(ent);
 		else if (ent->v.movetype == MOVETYPE_NOCLIP)
 			SV_Physics_Noclip (ent);
 		else if (ent->v.movetype == MOVETYPE_STEP)
