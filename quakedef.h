@@ -233,6 +233,9 @@ typedef struct
 	int		effects;
 	unsigned short nodrawtoclient; //Team Xlink DP_SV_NODRAWTOCLIENT
   	unsigned short drawonlytoclient; //Team Xlink DP_SV_DRAWONLYTOCLIENT
+  	int renderamt;
+	int rendermode;
+	vec3_t rendercolor;
 } entity_state_t;
 
 #include "wad.h"
