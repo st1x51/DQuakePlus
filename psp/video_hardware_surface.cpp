@@ -1459,7 +1459,7 @@ void R_DrawBrushModel (entity_t *e)
     }
 #endif
 
-	DrawFullBrightTextures (clmodel->surfaces, clmodel->numsurfaces);
+	//DrawFullBrightTextures (clmodel->surfaces, clmodel->numsurfaces);
 
 	clipping::end_brush_model();
 	sceGumPopMatrix();
@@ -1630,7 +1630,7 @@ void R_DrawWorld (void)
 	R_BlendLightmaps ();
 
 	
-    DrawFullBrightTextures (cl.worldmodel->surfaces, cl.worldmodel->numsurfaces);
+    //DrawFullBrightTextures (cl.worldmodel->surfaces, cl.worldmodel->numsurfaces);
 
 	if (skybox_name[0])
         R_DrawSkyBox ();
