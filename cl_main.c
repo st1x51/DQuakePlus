@@ -805,37 +805,26 @@ void CL_RelinkEntities (void)
 
 		}
 
-		if (ent->modelindex != cl_modelindex[mi_eyes] &&
-		    ((ent->modelindex != cl_modelindex[mi_player] && ent->model->modhint != MOD_PLAYER &&
-		      ent->modelindex != cl_modelindex[mi_h_player])))
+		if (ent->effects & EF_BRIGHTLIGHT)
 		{
-			if (ent->effects & EF_BRIGHTLIGHT)
-			{
-				vec3_t	tmp;
-
-				VectorCopy (ent->origin, tmp);
-				tmp[2] += 16;
-				dl->color[0] = 1;
-                dl->color[1] = 0.8;
-                dl->color[2] = 0.5;
-				CL_NewDlight (i, tmp, 400 + (rand() & 31), 0.1, lt_default);
-			}
-			else if (ent->effects & EF_DIMLIGHT)
-			{
-			    dl->color[0] = 0.5;
-                dl->color[1] = 0.5;
-                dl->color[2] = 0.5;
-				CL_NewDlight (i, ent->origin, 200 + (rand() & 31), 0.1, lt_default);
-            }
-		}
-
-		if (ent->effects & EF_DARKLIGHT)
-		{			
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin,  dl->origin);
-			dl->radius = 200.0 + (rand()&31);
+			dl->origin[2] += 16;
+			dl->radius = 400 + (rand()&31);
 			dl->die = cl.time + 0.001;
-			dl->dark = true;
+            dl->color[0] = 1;
+            dl->color[1] = 0.8;
+            dl->color[2] = 0.5;
+		}
+		if (ent->effects & EF_DIMLIGHT)
+		{
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin,  dl->origin);
+			dl->radius = 180;
+			dl->die = cl.time + 0.001;
+            dl->color[0] = 0.5;
+            dl->color[1] = 0.5;
+            dl->color[2] = 0.5;
 		}
 		if (ent->effects & EF_LIGHT)
 		{			
