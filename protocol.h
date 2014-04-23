@@ -41,16 +41,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	U_LONGENTITY (1<<14)
 
 // Tomaz - QC Alpha Scale Glow Control Begin
-#define	U_EXTEND1	    (1<<15)
+#define	U_EXTEND1	(1<<15)
 #define	U_RENDERMODE    (1<<16)
-#define	U_RENDERAMT	    (1<<17)
+#define	U_RENDERAMT	(1<<17)
 #define	U_RENDERCOLOR1  (1<<18)
 #define	U_RENDERCOLOR2  (1<<19)
 #define	U_RENDERCOLOR3  (1<<20)
-#define	U_EXTEND2	    (1<<21) // another byte to follow
+#define	U_EXTEND2	(1<<21) // another byte to follow
 // Tomaz - QC Alpha Scale Glow Control End
-
-
+#define U_FRAME2 	(1<<22) // 1 byte, this is .frame & 0xFF00 (second byte)
+//st1x51:max bytes can be 32
 #define	SU_VIEWHEIGHT	(1<<0)
 #define	SU_IDEALPITCH	(1<<1)
 #define	SU_PUNCH1		(1<<2)
