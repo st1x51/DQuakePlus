@@ -577,10 +577,12 @@ clentnum = EDICT_TO_PROG(clent); // LordHavoc: for comparison purposes //Team XL
 
         // Tomaz - QC Control Begin
         if (bits >= 65536)
-            bits |= U_EXTEND1;
+        	 bits |= U_EXTEND1;
         if (bits >= 16777216)
-			bits |= U_EXTEND2;
+		 bits |= U_EXTEND2;
 		// Tomaz - QC Control End
+	if (bits & U_FRAME && (int)ent->v.frame & 0xFF00) 
+		bits |= U_FRAME2;	
 
 	//
 	// write the message
@@ -601,9 +603,10 @@ clentnum = EDICT_TO_PROG(clent); // LordHavoc: for comparison purposes //Team XL
 			MSG_WriteShort (msg,e);
 		else
 			MSG_WriteByte (msg,e);
-
+		if (bits & U_FRAME2)
+			MSG_WriteByte(msg, (int)ent->v.frame >> 8);
 		if (bits & U_MODEL)
-			MSG_WriteByte (msg,	ent->v.modelindex);
+			MSG_WriteByte (msg, ent->v.modelindex);
 		if (bits & U_FRAME)
 			MSG_WriteByte (msg, ent->v.frame);
 		if (bits & U_COLORMAP)
@@ -640,6 +643,7 @@ clentnum = EDICT_TO_PROG(clent); // LordHavoc: for comparison purposes //Team XL
 
 	    if (bits & U_RENDERCOLOR3)
 	        MSG_WriteFloat(msg, rendercolor[2]);
+	        
         // Tomaz - QC Alpha Scale Glow End
 #endif
  	}
