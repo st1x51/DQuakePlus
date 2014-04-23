@@ -677,6 +677,8 @@ if (bits&(1<<i))
 		ent->frame = MSG_ReadByte ();
 	else
 		ent->frame = ent->baseline.frame;
+	if (bits & U_FRAME2)
+		ent->frame = (ent->frame & 0x00FF) | (MSG_ReadByte() << 8);	
 
 	if (bits & U_COLORMAP)
 		i = MSG_ReadByte();
