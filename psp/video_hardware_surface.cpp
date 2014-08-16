@@ -1038,7 +1038,8 @@ dynamic:
 
 		}
 	}
-    fa->draw_this_frame = 1;
+	// dr_mabuse1981: causing errors when loading a new HL_BSP map.
+    //fa->draw_this_frame = 1;
 }
 
 /*
