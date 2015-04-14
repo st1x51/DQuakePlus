@@ -1163,7 +1163,7 @@ void CL_ParseServerMessage (void)
 			if (i >= cl.maxclients)
 				Host_Error ("CL_ParseServerMessage: svc_updatecolors > MAX_SCOREBOARD");
 			cl.scores[i].colors = MSG_ReadByte ();
-			CL_NewTranslation (i);
+			//CL_NewTranslation (i);
 			break;
 			
 		case svc_particle:
