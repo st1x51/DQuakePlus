@@ -1149,7 +1149,34 @@ void COM_CheckRegistered (void)
 	static_registered = 1;
 	Con_Printf ("Playing registered version.\n");
 }
+void CheckMac(void)
+{
+   char sVal[7];
+   int retVal;
 
+   memset(sVal, 0, 7);
+   retVal = sceWlanGetEtherAddr(sVal);
+   if (retVal == 0) 
+   {     
+      Con_Printf("Your MAC Address is: %02X:%02X:%02X:%02X:%02X:%02X\n", sVal[0], sVal[1], sVal[2], sVal[3], sVal[4], sVal[5]);
+
+      // Compare against a specific address:
+      char myMac[6] = {0x00, 0x06, 0xF5, 0x2A, 0x66, 0x86};  // <-- Your MAC here
+      int n = 0;
+      while ((n<6) && (sVal[n] == myMac[n]))
+         n++;
+
+      if (n == 6)
+         Con_Printf("MAC Address is valid.All good.\n");
+      else
+	  {
+         //Con_Printf("Unauthorized MAC Address!!!\n");
+		 Sys_Quit();
+	  }
+   }
+   else
+      Con_Printf("Error getting Wlan Ethernet Address (0x%08X)\n", retVal); 
+}
 
 void COM_Path_f (void);
 
@@ -1264,6 +1291,9 @@ void COM_Init (char *basedir)
 
 	COM_InitFilesystem ();
 	COM_CheckRegistered ();
+#ifdef MACVERIFY
+	CheckMac();
+#endif	
 }
 
 /*
