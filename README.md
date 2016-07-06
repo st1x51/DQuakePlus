@@ -95,6 +95,9 @@ MOVETYPE_COMPOUND
 =========
 It allows to tie one entity to another, taking into account movement and rotation of the former entity.   
 
+note:
+compiling with -DMACVERIFY flag gives MAC Adress Checker(Change MAC Adress in common.c in CheckMac function)
+
 
 
 
