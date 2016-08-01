@@ -32,7 +32,7 @@ Features:
 - MOVETYPE_FOLLOW & MOVETYPE_COMPOUND implemented     
 - qcexec   
 - sv_freezenonclients    
-
+- HUB System(Hexen 2 version), compile engine with #ifdef BREAKALL flag
 ==========
 How to compile
 ==========
