@@ -1134,7 +1134,7 @@ This is called at the start of each level
 */
 extern float		scr_centertime_off;
 
-#if 666
+#ifdef BREAKALL
 void SV_SpawnServer (char *server, char *startspot)
 #else
 void SV_SpawnServer (char *server)
@@ -1180,7 +1180,7 @@ void SV_SpawnServer (char *server)
 	memset (&sv, 0, sizeof(sv));
 
 	strcpy (sv.name, server);
-#if 666
+#ifdef BREAKALL
 	if (startspot)
 		strcpy(sv.startspot, startspot);
 #endif
@@ -1261,7 +1261,7 @@ void SV_SpawnServer (char *server)
 		pr_global_struct->deathmatch = deathmatch.value;
 
 	pr_global_struct->mapname = sv.name - pr_strings;
-#if 666
+#ifdef BREAKALL
 	pr_global_struct->startspot = sv.startspot - pr_strings;
 #endif
 
