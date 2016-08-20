@@ -165,7 +165,7 @@ typedef struct client_s
 #define FL_FLASHLIGHT			8192
 #define FL_ARCHIVE_OVERRIDE		1048576
 #endif
-
+#define FL_ALWAYSTHINK			32768
 // entity effects
 
 #define	EF_BRIGHTFIELD			1
