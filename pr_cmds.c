@@ -1735,7 +1735,7 @@ PF_changelevel
 */
 void PF_changelevel (void)
 {
-#if 666
+#ifdef BREAKALL
 	char	*s1, *s2;
 
 	if (svs.changelevel_issued)

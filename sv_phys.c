@@ -438,7 +438,7 @@ SV_PushMove
 
 ============
 */
-void SV_PushMove (edict_t *pusher, float movetime)
+static edict_t *SV_PushMove( edict_t *pusher, float movetime )
 {
 	int			i, e;
 	edict_t		*check, *block;
@@ -565,7 +565,7 @@ SV_PushRotate
 
 ============
 */
-void SV_PushRotate (edict_t *pusher, float movetime)
+static edict_t *SV_PushRotate( edict_t *pusher, float movetime )
 {
    int         i, e;
    edict_t      *check, *block;
@@ -709,44 +709,56 @@ SV_Physics_Pusher
 */
 void SV_Physics_Pusher (edict_t *ent)
 {
-	float	thinktime;
-	float	oldltime;
-	float	movetime;
-
-	oldltime = ent->v.ltime;
+	float	oldtime, oldtime2;
+	float	thinktime, movetime;
+	edict_t	*pBlocker;
+	
+	pBlocker = NULL;
+	oldtime = ent->v.ltime;
 	
 	thinktime = ent->v.nextthink;
-	if (thinktime < ent->v.ltime + host_frametime)
+	if( thinktime < oldtime + host_frametime )
 	{
-		movetime = thinktime - ent->v.ltime;
-		if (movetime < 0)
-			movetime = 0;
+		movetime = thinktime - oldtime;
+		if( movetime < 0.0f ) movetime = 0.0f;
 	}
-	else
-		movetime = host_frametime;
+	else movetime = host_frametime;
 
-	
-
-		if (ent->v.avelocity[0] || ent->v.avelocity[1] || ent->v.avelocity[2])
-            SV_PushRotate (ent, host_frametime);
-		
-        if (movetime)
-		{
-		//ROTATE START
-		if ((ent->v.avelocity[0] || ent->v.avelocity[1] || ent->v.avelocity[2]) && ent->v.solid == SOLID_BSP)
-		SV_PushRotate (ent, host_frametime);
-		else
-		//ROTATE END
-            SV_PushMove (ent, movetime);	// advances ent->v.ltime if not blocked
-		}
-
-		
-	if (thinktime > oldltime && thinktime <= ent->v.ltime)
+		if( movetime )
 	{
-		ent->v.nextthink = 0;
+		if( !VectorIsNull( ent->v.avelocity ))
+		{
+			if( !VectorIsNull( ent->v.velocity ))
+			{
+				pBlocker = SV_PushRotate( ent, movetime );
+
+				if( !pBlocker )
+				{
+					oldtime2 = ent->v.ltime;
+
+					// reset the local time to what it was before we rotated
+					ent->v.ltime = oldtime;
+					pBlocker = SV_PushMove( ent, movetime );
+					if( oldtime2 < ent->v.ltime )
+						ent->v.ltime = oldtime2;
+				}
+			}
+			else
+			{
+				pBlocker = SV_PushRotate( ent, movetime );
+			}
+		}
+		else 
+		{
+			pBlocker = SV_PushMove( ent, movetime );
+		}
+	}
+
+	if( thinktime > oldtime && (( (int)ent->v.flags & FL_ALWAYSTHINK ) || thinktime <= ent->v.ltime ))
+	{
+		ent->v.nextthink = 0.0f;
 		pr_global_struct->time = sv.time;
 		pr_global_struct->self = EDICT_TO_PROG(ent);
-		pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
 		PR_ExecuteProgram (ent->v.think);
 		if (ent->free)
 			return;
