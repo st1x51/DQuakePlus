@@ -847,7 +847,9 @@ void SV_Physics_Compound( edict_t *ent )
 
 		// create parent actual position
 		Matrix4x4_CreateFromEntity( end_l, e->v.angles, e->v.origin, 1.0f );
-
+		
+		ent->v.angles[PITCH] = -ent->v.angles[PITCH];
+		
 		// create child actual position
 		Matrix4x4_CreateFromEntity( child, ent->v.angles, ent->v.origin, 1.0f );
 
